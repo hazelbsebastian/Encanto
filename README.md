@@ -7,9 +7,9 @@
 | Theme | Philippine Games and Sports |
 | Platform | Android (APK) and Windows (exe) - same project, same commit |
 | Engine | Godot 4.7.2 (GL Compatibility renderer) |
-| Version | 0.14.1 (Week 14) - tags `v0.13.0-week13`, `v0.14.1-week14` |
+| Version | 0.15.0 (Week 15) - tags `v0.13.0-week13`, `v0.14.1-week14`, `v0.15.0-week15` |
 | Repository | https://github.com/hazelbsebastian/Encanto |
-| Current commit | see `git log -1` / the Week 13 submission README |
+| Current commit | see `git log -1`; Week 15 build: tag `v0.15.0-week15` |
 
 ## Weekly log
 
@@ -17,22 +17,45 @@
 |---|---|---|---|
 | 13 | SA5, PT5 | `v0.13.0-week13` | Local player profiles, encrypted saves, 18 tests, debug APK |
 | 14 | PT6 | `v0.14.1-week14` | Accessibility fixes (48 dp touch targets, readable touch/keyboard hints, 13.6:1 contrast, volume saved per profile, auto-pause); playtest fixes (hit/miss/damage feedback, first-enemy tip); Windows build |
+| 15 | AS3 milestone | `v0.15.0-week15` | 31 automated gameplay tests + 20 save tests; 5 defects found and fixed (D01-D05); APK also runs on x86_64 (emulator) |
 
 ## Install (Windows)
 
-1. Unzip `Sebastian_Hazel_PT6_Windows.zip`.
+1. Unzip `Sebastian_Hazel_AS3_Windows.zip`.
 2. Run `Encanto/Encanto.exe` (keep `Encanto.pck` next to it).
    Windows may show "Windows protected your PC" because the exe is unsigned:
    More info -> Run anyway.
 
 ## Install (Android)
 
-1. Copy `Encanto.apk` to the phone (Android 7.0 or newer, ARM).
+1. Copy `Sebastian_Hazel_AS3.apk` to the phone (Android 7.0 or newer; ARM phones, or an x86_64 emulator).
 2. Allow "Install unknown apps" for your file manager, then open the APK.
 3. The app requests no permissions (no internet access).
 
 Build it yourself: Godot 4.7.2 + Android export templates, then
-`Project > Export > Android` (preset included; arm64-v8a + armeabi-v7a).
+`Project > Export > Android` (preset included; arm64-v8a + armeabi-v7a + x86_64).
+
+## Week 15 changes - testing and defect correction (AS3 milestone)
+
+- **New test suite** `tests/TestGameplay.gd` (31 cases): loads the real
+  scenes and plays them - shooting, waves, puzzle, boss, Game Over, pause,
+  reward, wardrobe - plus rapid input, missing data and app backgrounding.
+  Run:
+  `Godot_v4.7.2-stable_win64_console.exe --headless --path . res://tests/TestGameplayRunner.tscn`
+  (add `-- --only=F03,N12` for a subset). First run on 0.14.1: 25 passed,
+  5 failed. After the fixes: 31 passed, plus 20/20 save tests.
+- **Fixed:**
+  - D01 - direct hits that touched a creature's body showed MINTIS and did
+    no damage (10 of 12 test shots). Now 12 of 12 hit.
+  - D02 - double-tapping "Laban na!" after a puzzle skipped a whole stage.
+  - D03 - the Week 14 auto-pause never opened on a real focus loss (the OS
+    path locks the node; the menu is now opened deferred).
+  - D04 - the Kapre blew smoke during his intro while the player could not
+    move.
+  - D05 - smoke still in the air after the tree fell could cause Game Over
+    after winning, and then the win was not saved.
+- The APK now also includes x86_64 so the same file runs on the Android
+  emulator used for compatibility testing.
 
 ## Week 14 changes - usability and accessibility (PT6)
 
@@ -157,6 +180,11 @@ stage, streak), `SaveSystem` (local profiles + encrypted per-profile saves),
 - The charged throw needs press-and-hold; there is no tap-to-toggle option yet
   (players with limited hand control may find it hard).
 - Text size cannot be changed in settings.
+- No fire-rate limit on normal shots: tapping very fast fires a rock per
+  tap (40 in one frame in test N01) and builds the 5-shot charge quickly.
+  Deferred to Week 16 (performance and balance).
+- The wardrobe preview shows the Salakot icon for the Traditional Kerchief
+  (the 3D model in the game is correct).
 - The Week 13 APK is a debug build (signed with the Android debug key). A
   release keystore is needed for Week 17 and must never be committed.
 
