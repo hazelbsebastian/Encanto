@@ -15,7 +15,7 @@ func _ready() -> void:
 	UIKit.label(v, "NAKAHINTO", "HeaderLabel", 34)
 	UIKit.label(v, "Paused", "HintLabel", 14)
 
-	var resume := UIKit.button(v, "Ituloy ang Laro", true, 52)
+	var resume := UIKit.button(v, "Ituloy ang Laro", true, UIKit.MIN_TOUCH)
 	resume.pressed.connect(_resume)
 
 	var vol_row := UIKit.hbox(v, 12)
@@ -24,13 +24,12 @@ func _ready() -> void:
 	_volume.min_value = 0.0
 	_volume.max_value = 1.0
 	_volume.step = 0.05
-	_volume.custom_minimum_size = Vector2(180, 24)
-	var bus := AudioServer.get_bus_index("Master")
-	_volume.value = db_to_linear(AudioServer.get_bus_volume_db(bus))
+	_volume.custom_minimum_size = Vector2(200, 40)
+	_volume.value = SaveSystem.volume
 	_volume.value_changed.connect(_on_volume_changed)
 	vol_row.add_child(_volume)
 
-	var quit := UIKit.button(v, "Bumalik sa Main Menu", false, 46)
+	var quit := UIKit.button(v, "Bumalik sa Main Menu", false, UIKit.MIN_TOUCH)
 	quit.pressed.connect(_quit)
 
 	var controls := PanelContainer.new()
@@ -41,8 +40,7 @@ func _ready() -> void:
 	Controls.focus(resume)
 
 func _on_volume_changed(value: float) -> void:
-	var bus := AudioServer.get_bus_index("Master")
-	AudioServer.set_bus_volume_db(bus, linear_to_db(clampf(value, 0.01, 1.0)))
+	SaveSystem.set_volume(value)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
@@ -50,11 +48,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		_resume()
 
 func _resume() -> void:
+	SaveSystem.save_game()
 	Audio.play_sfx("click")
 	get_tree().paused = false
 	queue_free()
 
 func _quit() -> void:
+	SaveSystem.save_game()
 	Audio.play_sfx("click")
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/main/Title.tscn")

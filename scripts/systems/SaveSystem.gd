@@ -56,6 +56,9 @@ var equipped: Dictionary = DEFAULT_EQUIPPED.duplicate()
 var game_completed: bool = false
 var completed_enemies: Array = []
 var bayong_rewards_obtained: Array = []
+## Week 14: master volume (0.0-1.0) is part of the profile, so each player's
+## setting is kept between sessions (it reset to full volume before).
+var volume: float = 1.0
 
 var _device_secret: String = ""
 
@@ -195,7 +198,19 @@ func default_data() -> Dictionary:
 		"game_completed": false,
 		"completed_enemies": [],
 		"bayong_rewards_obtained": [],
+		"volume": 1.0,
 	}
+
+## Changes the volume immediately. Call save_game() when the player is done
+## (e.g. closing settings) so dragging the slider doesn't write the file 20x.
+func set_volume(value: float) -> void:
+	volume = clampf(value, 0.0, 1.0)
+	_apply_volume()
+
+func _apply_volume() -> void:
+	var bus := AudioServer.get_bus_index("Master")
+	AudioServer.set_bus_mute(bus, volume < 0.01)
+	AudioServer.set_bus_volume_db(bus, linear_to_db(maxf(volume, 0.01)))
 
 ## Kept for compatibility: reloads the active profile from disk.
 func load_game() -> void:
@@ -217,6 +232,7 @@ func save_game() -> bool:
 		"game_completed": game_completed,
 		"completed_enemies": completed_enemies,
 		"bayong_rewards_obtained": bayong_rewards_obtained,
+		"volume": volume,
 	}
 	var tmp := _tmp_path(active_id)
 	var f := FileAccess.open_encrypted_with_pass(tmp, FileAccess.WRITE, _key_for(active_id))
@@ -394,6 +410,8 @@ func _sanitize(raw: Dictionary) -> Dictionary:
 			for v in arr:
 				clean.append(str(v).left(32))
 		d[key] = clean
+	var vol = raw.get("volume", 1.0)
+	d["volume"] = clampf(float(vol), 0.0, 1.0) if (typeof(vol) == TYPE_FLOAT or typeof(vol) == TYPE_INT) else 1.0
 	return d
 
 func _apply(data: Dictionary) -> void:
@@ -403,6 +421,8 @@ func _apply(data: Dictionary) -> void:
 	game_completed = bool(data.get("game_completed", false))
 	completed_enemies = data.get("completed_enemies", [])
 	bayong_rewards_obtained = data.get("bayong_rewards_obtained", [])
+	volume = clampf(float(data.get("volume", 1.0)), 0.0, 1.0)
+	_apply_volume()
 
 ## index.json only lists ids, nicknames and creation time - no game data.
 func _save_index() -> void:

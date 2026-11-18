@@ -38,6 +38,8 @@ func _ready() -> void:
 		["T16", "Storage write failure is reported, no crash", t16_write_failure],
 		["T17", "Old plain-text save migrated and deleted", t17_legacy],
 		["T18", "Interrupted save (leftover .tmp) keeps last good data", t18_interrupted],
+		["T19", "Volume is saved per profile (Week 14)", t19_volume_per_profile],
+		["T20", "Out-of-range / wrong-type volume is sanitised", t20_volume_sanitize],
 	]
 	for t in tests:
 		_fresh()
@@ -299,3 +301,34 @@ func t18_interrupted() -> void:
 	check(SaveSystem.money == 80, "last complete save (80) used (got %d)" % SaveSystem.money)
 	SaveSystem.add_money(1)
 	check(SaveSystem.money == 81, "next save succeeds over leftover .tmp")
+
+func t19_volume_per_profile() -> void:
+	var a := SaveSystem.create_profile("Loud")
+	SaveSystem.set_volume(0.9)
+	SaveSystem.save_game()
+	var b := SaveSystem.create_profile("Quiet")
+	SaveSystem.set_volume(0.25)
+	SaveSystem.save_game()
+	_restart()
+	check(is_equal_approx(SaveSystem.volume, 0.25), "Quiet keeps 0.25 after restart (got %.2f)" % SaveSystem.volume)
+	var bus := AudioServer.get_bus_index("Master")
+	check(is_equal_approx(db_to_linear(AudioServer.get_bus_volume_db(bus)), 0.25), "audio bus actually set to 0.25")
+	SaveSystem.select_profile(a["id"])
+	check(is_equal_approx(SaveSystem.volume, 0.9), "Loud keeps 0.9 (got %.2f)" % SaveSystem.volume)
+	SaveSystem.set_volume(0.0)
+	check(AudioServer.is_bus_mute(bus), "volume 0 mutes the bus")
+	SaveSystem.set_volume(1.0)
+
+func t20_volume_sanitize() -> void:
+	var r := SaveSystem.create_profile("Vol")
+	var id: String = r["id"]
+	for bad in [7.5, -3, "loud"]:
+		var data := {"version": 2, "profile_id": id, "profile_name": "Vol", "money": 0, "volume": bad}
+		var f := FileAccess.open_encrypted_with_pass(SaveSystem._save_path(id), FileAccess.WRITE, SaveSystem._key_for(id))
+		f.store_string(JSON.stringify(data))
+		f.close()
+		SaveSystem.select_profile(id)
+		check(SaveSystem.volume >= 0.0 and SaveSystem.volume <= 1.0, "volume %s -> in 0..1 (got %.2f)" % [str(bad), SaveSystem.volume])
+		note("%s -> %.2f" % [str(bad), SaveSystem.volume])
+	SaveSystem.set_volume(1.0)
+
