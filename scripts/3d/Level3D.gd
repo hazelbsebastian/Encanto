@@ -142,7 +142,11 @@ func _unhandled_input(event: InputEvent) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		if is_inside_tree() and hud != null:
-			open_pause_menu()
+			# Week 15 fix D03: the OS sends this through SceneTree, which
+			# propagates it down the tree. While that runs the node is
+			# locked and add_child() fails ("Parent node is busy"), so the
+			# menu never opened. Open it right after the notification.
+			open_pause_menu.call_deferred()
 
 ## Also called by the HUD's on-screen pause button.
 func open_pause_menu() -> void:

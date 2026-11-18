@@ -53,8 +53,11 @@ func _ready() -> void:
 			for i in 6:
 				await get_tree().process_frame
 			await _shot_only("hit_and_hurt_feedback", 0)
-		# simulate the app losing focus (phone call / home button / alt-tab)
-		lvl.notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
+		# simulate the app losing focus (phone call / home button / alt-tab).
+		# Week 15: sent to the SceneTree like the OS does - the Week 14
+		# version called lvl.notification() directly and missed defect D03.
+		get_tree().notification(MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT)
+		await get_tree().process_frame
 		await get_tree().process_frame
 		_report.append("CHECK   app focus-out pauses the game: %s" % ("PASS" if get_tree().paused else "FAIL"))
 		if not get_tree().paused:
