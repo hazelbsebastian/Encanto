@@ -1,4 +1,33 @@
-# Encanto (prototype)
+# Encanto
+
+| | |
+|---|---|
+| Student | [LASTNAME], [FirstName] - [Student Number] |
+| Game title | Encanto |
+| Theme | Philippine Games and Sports |
+| Platform | Android (target), Windows (development and testing) |
+| Engine | Godot 4.7.2 (GL Compatibility renderer) |
+| Version | 0.13.0 (Week 13) - tag `v0.13.0-week13` |
+| Repository | [paste GitHub URL here] |
+| Current commit | see `git log -1` / the Week 13 submission README |
+
+## Week 13 changes - local player profiles (PT5)
+
+- **Profiles:** up to 4 local profiles per device, each with a nickname
+  (2-12 letters/numbers/spaces/-/_). First launch opens the profile screen;
+  the title screen shows the active player and has a PROFILE button.
+- **Protected saves:** each profile has its own encrypted save
+  (`user://profiles/<id>.sav`). The key comes from the device id plus a random
+  per-install value (`device.key`), so no key is in the source code or repo.
+  Edited or damaged saves are rejected; the last good backup is restored.
+- **Old saves:** a pre-Week-13 `encanto_save.json` is moved into a profile
+  called "Player 1" on first launch, then the plain-text file is deleted.
+- **No network, no analytics, no real names.** See the Week 13 SA5 data
+  inventory for every data item.
+- **Tests:** `tests/TestProfiles.gd` has 18 automated cases. Run:
+  `Godot_v4.7.2-stable_win64_console.exe --headless --path . res://tests/TestRunner.tscn -- --run-tests`
+  (uses a separate test folder and never touches real saves).
+
 
 A Filipino-folklore-inspired 3D action game, built as a playable Godot 4
 project. The battles take place in real 3D recreations of five Philippine
@@ -42,8 +71,8 @@ running lower body) -> puzzle -> Tikbalang x4 (double jump) -> puzzle ->
 Kapre boss (dodge random smoke attacks, break the tree with charged shots)
 -> victory -> jeepney ride out -> **Pera o Bayong** reward -> wardrobe
 (spend Pera money on outfits, or unlock outfits for free from the Bayong)
--> Play Again. Money and wardrobe unlocks are saved to
-`user://encanto_save.json` and persist between sessions.
+-> Play Again. Money and wardrobe unlocks are saved per player profile in
+`user://profiles/<id>.sav` (encrypted) and persist between sessions.
 
 ## 3D + audio (scripts/3d/, assets/audio/)
 
@@ -74,9 +103,21 @@ gen_scripts/   the Python/Pillow tools used to generate every sprite and
 ```
 
 Systems are autoloaded singletons: `GameManager` (run state: hearts,
-stage, streak), `SaveSystem` (persistent money/clothing, JSON on disk),
+stage, streak), `SaveSystem` (local profiles + encrypted per-profile saves),
 `ClothingData` (wardrobe catalogue + Bayong reward pool - easy to extend),
 `Audio` (SFX playback pool).
+
+## Known limitations
+
+- The save key lives on the same device as the save. Encryption stops casual
+  editing and copying saves between devices/profiles, but a player with full
+  access to the device and the game files could still recover the key. That is
+  acceptable here because the game is offline and single-player (no
+  leaderboard, no purchases), but it would not be enough for online data.
+- No cloud backup: uninstalling the game or clearing app data deletes all
+  profiles.
+- No export templates were installed in Week 13, so there is no packaged
+  .apk/.exe yet; the game runs from the Godot editor.
 
 ## Known prototype simplifications
 
