@@ -7,7 +7,7 @@
 | Theme | Philippine Games and Sports |
 | Platform | Android (APK) and Windows (exe) - same project, same commit |
 | Engine | Godot 4.7.2 (GL Compatibility renderer) |
-| Version | 0.14.0 (Week 14) - tags `v0.13.0-week13`, `v0.14.0-week14` |
+| Version | 0.14.1 (Week 14) - tags `v0.13.0-week13`, `v0.14.1-week14` |
 | Repository | https://github.com/hazelbsebastian/Encanto |
 | Current commit | see `git log -1` / the Week 13 submission README |
 
@@ -16,7 +16,7 @@
 | Week | Output | Tag | Main changes |
 |---|---|---|---|
 | 13 | SA5, PT5 | `v0.13.0-week13` | Local player profiles, encrypted saves, 18 tests, debug APK |
-| 14 | PT6 | `v0.14.0-week14` | Accessibility fixes (48 dp touch targets, readable touch/keyboard hints, 13.6:1 contrast, volume saved per profile, auto-pause), Windows build, playtesting kit |
+| 14 | PT6 | `v0.14.1-week14` | Accessibility fixes (48 dp touch targets, readable touch/keyboard hints, 13.6:1 contrast, volume saved per profile, auto-pause); playtest fixes (hit/miss/damage feedback, first-enemy tip); Windows build |
 
 ## Install (Windows)
 
@@ -43,6 +43,8 @@ Build it yourself: Godot 4.7.2 + Android export templates, then
   keyboard (`Controls.touch_mode`).
 - **Volume** is saved per profile (was reset every launch).
 - **Auto-pause** when the app loses focus (phone call, home button, alt-tab).
+- **Playtest fixes (3 testers):** TAMA! / MINTIS feedback for hits and misses,
+  red screen-edge flash when a heart is lost, first-enemy tip.
 - **Audit tool:** `tests/AccessibilityAudit.tscn` measures every button and
   label on the real screens and saves screenshots.
 - Tests: 20 automated cases (T19-T20 for volume), all passing.
