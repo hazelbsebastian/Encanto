@@ -8,7 +8,7 @@
 | Platform | Android (target), Windows (development and testing) |
 | Engine | Godot 4.7.2 (GL Compatibility renderer) |
 | Version | 0.13.0 (Week 13) - tag `v0.13.0-week13` |
-| Repository | [paste GitHub URL here] |
+| Repository | https://github.com/hazelbsebastian/Encanto |
 | Current commit | see `git log -1` / the Week 13 submission README |
 
 ## Install (Android)
