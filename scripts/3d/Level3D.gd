@@ -229,6 +229,10 @@ func _start_stage() -> void:
 		return
 	if stage == "tikbalang":
 		get_tree().create_timer(3.0, false).timeout.connect(func() -> void: Audio.play_voice("narrator_double_jump"))
+	if stage == "tyanak":
+		# Week 14 (playtest P1: unsure what happens when an enemy gets close)
+		var tip := "Tip: Batuhin ang Tyanak gamit ang TIRA bago siya makalapit. Kapag tinamaan ka niya, mababawasan ang PUSO mo." if Controls.touch_mode 			else "Tip: Batuhin ang Tyanak gamit ang X bago siya makalapit. Kapag tinamaan ka niya, mababawasan ang PUSO mo."
+		get_tree().create_timer(2.6, false).timeout.connect(func() -> void: show_dialogue(tip, 5.0))
 	_spawned_this_stage = 0
 	_active_enemies.clear()
 	await get_tree().create_timer(1.2, false).timeout
