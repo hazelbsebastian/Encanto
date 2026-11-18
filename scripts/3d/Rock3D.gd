@@ -57,8 +57,19 @@ func _on_area_entered(area: Area3D) -> void:
 	area.call("receive_hit", damage, is_charged, global_position)
 	_impact(true)
 
-func _on_body_entered(_body: Node3D) -> void:
-	if not _done:
+## Week 15 fix D01: a creature's own body is also on layer 2. When the rock
+## touched the body before (or in the same physics step as) the hit-area,
+## this used to count as a miss ("MINTIS", no damage). Any body that can
+## take damage is now a hit; only the ground and props are misses.
+func _on_body_entered(body: Node3D) -> void:
+	if _done:
+		return
+	# the balete tree's solid trunk is a child StaticBody of the tree
+	var target: Node = body if body.has_method("take_damage") else body.get_parent()
+	if target != null and target.has_method("take_damage"):
+		target.call("take_damage", damage, is_charged, global_position)
+		_impact(true)
+	else:
 		_impact(false)
 
 func _impact(hit_enemy: bool) -> void:

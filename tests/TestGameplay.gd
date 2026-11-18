@@ -67,6 +67,7 @@ func _run() -> void:
 		["N12", "After the tree falls, leftover smoke must not cost hearts", n12_smoke_after_win],
 		["N13", "Charge held while pausing is released cleanly after resume", n13_charge_through_pause],
 		["N14", "Bought outfit survives app restart; money cannot go negative", n14_wardrobe_persist],
+		["N15", "Real charged shots at the balete tree from 4 sides all count", n15_charged_shots_tree],
 	]
 	var only := _only_filter()
 	for t in tests:
@@ -719,3 +720,32 @@ func n14_wardrobe_persist() -> void:
 	SaveSystem.init_storage()
 	SaveSystem.select_profile(id)
 	check(SaveSystem.is_unlocked("improved_polo") and SaveSystem.money == 0, "outfit and P0 survive restart")
+
+func n15_charged_shots_tree() -> void:
+	await start_level()
+	go_to_boss()
+	await wait_until(func() -> bool: return bool(_level.player.get("controls_enabled")), 8.0)
+	var tree: Node3D = get_tree().get_first_node_in_group("charged_targets")
+	var kapre: Node = null
+	for c in _level.world.get_children():
+		if c.get_script() == load("res://scripts/3d/Kapre3D.gd"):
+			kapre = c
+	if kapre:
+		kapre.set("_stun", 999.0)   # no smoke during this test
+	var sh: Node = _level.player.get_node("Shooting")
+	var counted := 0
+	var sides := [Vector3(0, 0, 9), Vector3(9, 0, 0), Vector3(-9, 0, 3), Vector3(5, 0, 8)]
+	for off in sides:
+		_level.player.global_position = tree.global_position + off
+		await physics(3)
+		var before := int(tree.get("hits_taken"))
+		GameManager.charge_unlocked = true
+		sh.call("shoot_button_down")
+		await wait(0.6)
+		sh.call("shoot_button_up")
+		var ok := await wait_until(func() -> bool: return int(tree.get("hits_taken")) > before, 1.5)
+		if ok:
+			counted += 1
+		await physics(5)
+	note("charged shots fired: %d, counted by the tree: %d" % [sides.size(), counted])
+	check(counted == sides.size(), "every charged shot at the tree counts")
