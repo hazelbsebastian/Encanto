@@ -1,0 +1,36 @@
+[gd_resource type="SpriteFrames" load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enemies/manananggal/lower_idle_0.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/enemies/manananggal/lower_idle_1.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/enemies/manananggal/lower_attack.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/enemies/manananggal/lower_death.png" id="4"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2")
+}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4")
+}],
+"loop": false,
+"name": &"death",
+"speed": 4.0
+}]

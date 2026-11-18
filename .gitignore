@@ -1,0 +1,29 @@
+# Godot cache / imported data (regenerated on open)
+.godot/
+*.import.tmp
+
+# Export output and export credentials (keystore passwords, signing keys)
+/build/
+*.apk
+*.aab
+*.exe
+*.pck
+export_credentials.cfg
+.godot/export_credentials.cfg
+
+# Keystores and local secrets - never commit
+*.keystore
+*.jks
+*.p12
+.env
+.env.*
+secrets.cfg
+
+# Python tool cache / raw TTS recordings
+gen_scripts/__pycache__/
+gen_scripts/voice_raw/
+
+# OS files
+desktop.ini
+Thumbs.db
+.DS_Store

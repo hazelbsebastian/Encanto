@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/Manananggal.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/enemies/ManananggalUpper.gd" id="2"]
+[ext_resource type="SpriteFrames" path="res://scenes/enemies/ManananggalLowerFrames.tres" id="3"]
+[ext_resource type="SpriteFrames" path="res://scenes/enemies/ManananggalUpperFrames.tres" id="4"]
+[ext_resource type="Script" path="res://scripts/enemies/EnemyHitbox.gd" id="5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lower"]
+size = Vector2(22, 30)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_upper"]
+size = Vector2(44, 40)
+
+[node name="Manananggal" type="CharacterBody2D" groups=["enemies"]]
+collision_layer = 2
+collision_mask = 16
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -15)
+shape = SubResource("RectangleShape2D_lower")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -18)
+scale = Vector2(0.5, 0.5)
+sprite_frames = ExtResource("3")
+animation = &"run"
+
+[node name="HitArea" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("5")
+owner_enemy_path = NodePath("..")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitArea"]
+position = Vector2(0, -15)
+shape = SubResource("RectangleShape2D_lower")
+
+[node name="Upper" type="Node2D" parent="."]
+position = Vector2(0, -100)
+script = ExtResource("2")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="Upper"]
+scale = Vector2(0.5, 0.5)
+sprite_frames = ExtResource("4")
+animation = &"fly"
+
+[node name="HitArea" type="Area2D" parent="Upper"]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("5")
+owner_enemy_path = NodePath("../..")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Upper/HitArea"]
+shape = SubResource("RectangleShape2D_upper")
