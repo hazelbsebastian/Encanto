@@ -11,6 +11,15 @@
 | Repository | [paste GitHub URL here] |
 | Current commit | see `git log -1` / the Week 13 submission README |
 
+## Install (Android)
+
+1. Copy `Encanto.apk` to the phone (Android 7.0 or newer, ARM).
+2. Allow "Install unknown apps" for your file manager, then open the APK.
+3. The app requests no permissions (no internet access).
+
+Build it yourself: Godot 4.7.2 + Android export templates, then
+`Project > Export > Android` (preset included; arm64-v8a + armeabi-v7a).
+
 ## Week 13 changes - local player profiles (PT5)
 
 - **Profiles:** up to 4 local profiles per device, each with a nickname
@@ -116,8 +125,8 @@ stage, streak), `SaveSystem` (local profiles + encrypted per-profile saves),
   leaderboard, no purchases), but it would not be enough for online data.
 - No cloud backup: uninstalling the game or clearing app data deletes all
   profiles.
-- No export templates were installed in Week 13, so there is no packaged
-  .apk/.exe yet; the game runs from the Godot editor.
+- The Week 13 APK is a debug build (signed with the Android debug key). A
+  release keystore is needed for Week 17 and must never be committed.
 
 ## Known prototype simplifications
 
