@@ -128,7 +128,8 @@ func take_damage(amount: int, _is_charged: bool = false, at: Vector3 = Vector3.Z
 		return
 	health -= amount
 	M3.flash(model)
-	FX.popup_text(get_parent(), get_aim_point() + Vector3(0, 0.5, 0), "-%d" % amount)
+	FX.popup_text(get_parent(), get_aim_point() + Vector3(0, 0.5, 0), "TAMA! -%d" % amount)
+	get_tree().call_group("hud", "show_hit_confirm")
 	var push := global_position - (at if at != Vector3.ZERO else global_position + forward())
 	push.y = 0
 	velocity += push.normalized() * 4.0 + Vector3.UP * 2.0

@@ -38,7 +38,13 @@ var _piece_slots: Array[TextureRect] = []
 var _pieces_for: String = ""
 var _last_count: int = 0
 
+var _last_hearts: int = -1
+var _hurt_flash: ColorRect
+var _hit_label: Label
+
 func _ready() -> void:
+	add_to_group("hud")
+	_build_feedback_layer()
 	GameManager.hearts_changed.connect(_on_hearts_changed)
 	GameManager.streak_changed.connect(_on_streak_changed)
 	GameManager.puzzle_pieces_changed.connect(_on_puzzle_changed)
@@ -54,6 +60,48 @@ func _ready() -> void:
 	Controls.input_mode_changed.connect(func(_t: bool) -> void: _apply_hints())
 	get_viewport().size_changed.connect(_layout_hints)
 	_apply_hints()
+
+## Week 14 (playtest P3): clearer feedback. A red screen-edge flash when a
+## heart is lost and a "TAMA!" confirmation when a throw hits.
+func _build_feedback_layer() -> void:
+	_hurt_flash = ColorRect.new()
+	_hurt_flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_hurt_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = "shader_type canvas_item; uniform float strength = 0.0; void fragment() { vec2 d = abs(UV - 0.5) * 2.0; float e = smoothstep(0.55, 1.0, max(d.x, d.y)); COLOR = vec4(0.85, 0.05, 0.05, e * strength); }"
+	mat.shader = sh
+	_hurt_flash.material = mat
+	add_child(_hurt_flash)
+	move_child(_hurt_flash, 1)
+	_hit_label = Label.new()
+	_hit_label.text = "TAMA!"
+	_hit_label.add_theme_font_size_override("font_size", 30)
+	_hit_label.add_theme_color_override("font_color", Color(1, 0.86, 0.3))
+	_hit_label.add_theme_color_override("font_outline_color", Color(0.2, 0.08, 0.02))
+	_hit_label.add_theme_constant_override("outline_size", 8)
+	_hit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hit_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_hit_label.position = Vector2(-80, 150)
+	_hit_label.size = Vector2(160, 40)
+	_hit_label.modulate.a = 0.0
+	_hit_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_hit_label)
+
+func show_hit_confirm() -> void:
+	_hit_label.modulate.a = 1.0
+	_hit_label.pivot_offset = _hit_label.size * 0.5
+	_hit_label.scale = Vector2(1.4, 1.4)
+	var tw := _hit_label.create_tween()
+	tw.tween_property(_hit_label, "scale", Vector2.ONE, 0.15)
+	tw.tween_interval(0.35)
+	tw.tween_property(_hit_label, "modulate:a", 0.0, 0.3)
+
+func _flash_hurt() -> void:
+	var mat := _hurt_flash.material as ShaderMaterial
+	mat.set_shader_parameter("strength", 0.9)
+	var tw := _hurt_flash.create_tween()
+	tw.tween_method(func(v: float) -> void: mat.set_shader_parameter("strength", v), 0.9, 0.0, 0.6)
 
 func _apply_hints() -> void:
 	var words: Dictionary = HINT_TEXT["touch" if Controls.touch_mode else "keys"]
@@ -115,6 +163,10 @@ func _update_stage_label() -> void:
 	stage_label.text = GameManager.creature_name(stage).to_upper() if stage != "" else ""
 
 func _on_hearts_changed(current: int, max_hearts: int) -> void:
+	var lost := _last_hearts >= 0 and current < _last_hearts
+	_last_hearts = current
+	if lost:
+		_flash_hurt()
 	for c in hearts_box.get_children():
 		c.queue_free()
 	for i in range(max_hearts):
@@ -124,6 +176,8 @@ func _on_hearts_changed(current: int, max_hearts: int) -> void:
 		tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		hearts_box.add_child(tex)
+		if lost and i == current:
+			_pop(tex)   # the heart that was just lost pops so the player notices
 
 func _on_streak_changed(streak: int, charge_unlocked: bool) -> void:
 	if charge_unlocked:

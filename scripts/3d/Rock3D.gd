@@ -63,7 +63,11 @@ func _on_body_entered(_body: Node3D) -> void:
 
 func _impact(hit_enemy: bool) -> void:
 	_done = true
+	# Week 14 (playtest P3: "could not tell whether my action was successful"):
+	# a hit is always audible (not distance-faded) and a miss is marked.
 	if hit_enemy:
-		Audio.play_3d("rock_hit", global_position, 0.0, randf_range(0.9, 1.1))
+		Audio.play_sfx("rock_hit")
+	else:
+		FX.popup_text(get_tree().current_scene, global_position + Vector3(0, 0.6, 0), "MINTIS", Color(0.82, 0.82, 0.82))
 	FX.puff(get_tree().current_scene, global_position, Color(1, 0.8, 0.4) if is_charged else Color(0.85, 0.8, 0.7), 0.6 if is_charged else 0.3)
 	queue_free()
