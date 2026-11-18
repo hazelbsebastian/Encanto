@@ -1,5 +1,10 @@
 class_name UIKit
 extends RefCounted
+
+## Week 14: smallest height for anything the player taps. The 960x540 canvas
+## is drawn about 2x on a typical phone (~2.5 px per dp), so 60 px ~ 48 dp,
+## the Android minimum touch-target size.
+const MIN_TOUCH := 60
 ## Small helpers for building themed pop-ups in code (puzzle, pause menu...).
 ## Styling itself comes from assets/ui/encanto_theme.tres (project theme);
 ## these helpers only pick the right theme variations and wire up layout.

@@ -7,6 +7,7 @@ const ERROR_COLOR := Color(1.0, 0.55, 0.45)
 const OK_COLOR := Color(0.65, 0.95, 0.6)
 
 var _list: VBoxContainer
+var _new_row: HBoxContainer
 var _name_edit: LineEdit
 var _create_button: Button
 var _message: Label
@@ -23,29 +24,31 @@ func _ready() -> void:
 	UIKit.dim(self, 0.55)
 
 	var panel := UIKit.centered_panel(self, Vector2(560, 0))
-	var v := UIKit.vbox(panel, 10)
-	UIKit.label(v, "SINO ANG MAGLALARO?", "HeaderLabel", 30)
+	var v := UIKit.vbox(panel, 6)
+	UIKit.label(v, "SINO ANG MAGLALARO?", "HeaderLabel", 26)
 	UIKit.label(v, "Choose your player profile", "AccentLabel", 16)
 
-	_list = UIKit.vbox(v, 8)
+	_list = UIKit.vbox(v, 6)
 
 	var new_row := UIKit.hbox(v, 10)
+	_new_row = new_row
 	_name_edit = LineEdit.new()
 	_name_edit.placeholder_text = "Bagong palayaw (nickname)"
 	_name_edit.max_length = SaveSystem.NAME_MAX
-	_name_edit.custom_minimum_size = Vector2(300, 46)
+	_name_edit.custom_minimum_size = Vector2(300, UIKit.MIN_TOUCH)
 	_name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_name_edit.text_submitted.connect(func(_t: String) -> void: _on_create())
 	_name_edit.text_changed.connect(func(_t: String) -> void: _show(""))
 	new_row.add_child(_name_edit)
-	_create_button = UIKit.button(new_row, "GUMAWA", true, 46)
+	_create_button = UIKit.button(new_row, "GUMAWA", true, UIKit.MIN_TOUCH)
 	_create_button.custom_minimum_size.x = 130
 	_create_button.pressed.connect(_on_create)
 
 	_message = UIKit.label(v, "", "", 15)
+	_message.visible = false
 	UIKit.label(v, "Saved only on this device. Use a nickname - not your full name.", "HintLabel", 13)
 
-	_back_button = UIKit.button(v, "BUMALIK", false, 44)
+	_back_button = UIKit.button(v, "BUMALIK", false, UIKit.MIN_TOUCH)
 	_back_button.pressed.connect(_on_back)
 
 	SaveSystem.save_failed.connect(_on_save_failed)
@@ -66,16 +69,13 @@ func _refresh() -> void:
 	var first_focus: Control = null
 	for p in SaveSystem.profiles:
 		var id: String = p["id"]
-		var card := PanelContainer.new()
-		card.theme_type_variation = "CardPanel"
-		_list.add_child(card)
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
-		card.add_child(row)
+		_list.add_child(row)
 		var is_active: bool = id == SaveSystem.active_id
 		var play := Button.new()
 		play.text = ("▶ " if is_active else "") + str(p["name"])
-		play.custom_minimum_size = Vector2(250, 42)
+		play.custom_minimum_size = Vector2(230, UIKit.MIN_TOUCH)
 		play.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		play.theme_type_variation = "GoldButton" if is_active else ""
 		play.pressed.connect(_on_select.bind(id))
@@ -84,21 +84,22 @@ func _refresh() -> void:
 			var reset := Button.new()
 			reset.text = "I-RESET"
 			reset.tooltip_text = "Clear money and outfits for this profile"
-			reset.custom_minimum_size = Vector2(100, 42)
+			reset.custom_minimum_size = Vector2(100, UIKit.MIN_TOUCH)
 			reset.pressed.connect(_on_reset.bind(reset))
 			row.add_child(reset)
 		var del := Button.new()
 		del.text = "SIGURADO?" if _confirm_delete_id == id else "BURAHIN"
-		del.custom_minimum_size = Vector2(110, 42)
+		del.custom_minimum_size = Vector2(110, UIKit.MIN_TOUCH)
 		del.pressed.connect(_on_delete.bind(id))
 		row.add_child(del)
 		if first_focus == null or is_active:
 			first_focus = play
 	var full := SaveSystem.profiles.size() >= SaveSystem.MAX_PROFILES
-	_name_edit.editable = not full
-	_create_button.disabled = full
+	# When the device is full the create row is hidden (keeps all buttons at
+	# full touch size on a 540 px tall screen) and a hint explains why.
+	_new_row.visible = not full
 	if full:
-		_name_edit.placeholder_text = "Max %d profiles - delete one first" % SaveSystem.MAX_PROFILES
+		_list.add_child(_hint("Max %d profiles - burahin ang isa para gumawa ng bago." % SaveSystem.MAX_PROFILES))
 	_back_button.visible = SaveSystem.has_active_profile()
 	if SaveSystem.profiles.is_empty():
 		_list.add_child(_hint("Wala pang profile. Type a nickname below to start."))
@@ -114,6 +115,7 @@ func _hint(text: String) -> Label:
 
 func _show(text: String, is_error: bool = false) -> void:
 	_message.text = text
+	_message.visible = text != ""
 	_message.add_theme_color_override("font_color", ERROR_COLOR if is_error else OK_COLOR)
 
 func _on_create() -> void:

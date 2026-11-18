@@ -5,7 +5,7 @@ extends Control
 @onready var money_label: Label = $MoneyChip/Row/MoneyLabel
 @onready var title_label: Label = $VBox/TitleLabel
 @onready var play_button: Button = $VBox/PlayButton
-@onready var settings_button: Button = $VBox/SettingsButton
+@onready var settings_button: Button = $VBox/MenuGrid/SettingsButton
 @onready var settings_dim: ColorRect = $SettingsDim
 @onready var settings_panel: PanelContainer = $SettingsPanel
 @onready var volume_slider: HSlider = $SettingsPanel/VBox/VolumeSlider
@@ -21,26 +21,30 @@ func _ready() -> void:
 		get_tree().change_scene_to_file.call_deferred("res://scenes/ui/ProfileSelect.tscn")
 		return
 	$PlayerChip/PlayerLabel.text = "Player: %s" % SaveSystem.active_profile_name()
-	$VBox/ProfileButton.pressed.connect(_on_profile)
+	$VBox/MenuGrid/ProfileButton.pressed.connect(_on_profile)
 	SaveSystem.save_failed.connect(_on_save_failed)
 	var notice := SaveSystem.take_notice()
 	if notice != "":
 		_toast(notice)
 	money_label.text = "₱%d" % SaveSystem.money
 	play_button.pressed.connect(_on_play)
-	$VBox/WardrobeButton.pressed.connect(_on_wardrobe)
+	$VBox/MenuGrid/WardrobeButton.pressed.connect(_on_wardrobe)
 	settings_button.pressed.connect(_on_settings_open)
-	$VBox/ExitButton.pressed.connect(_on_exit)
+	$VBox/MenuGrid/ExitButton.pressed.connect(_on_exit)
 	close_button.pressed.connect(_on_settings_close)
-	var bus := AudioServer.get_bus_index("Master")
-	volume_slider.value = db_to_linear(AudioServer.get_bus_volume_db(bus))
+	volume_slider.value = SaveSystem.volume
 	volume_slider.value_changed.connect(_on_volume_changed)
+	# keyboard hint only makes sense for keyboard players (Week 14)
+	# (faded, not hidden, so the menu layout and title animation don't shift)
+	$VBox/KeysHint.modulate.a = 0.0 if Controls.touch_mode else 1.0
+	Controls.input_mode_changed.connect(func(t: bool) -> void: $VBox/KeysHint.modulate.a = 0.0 if t else 1.0)
 	settings_panel.visible = false
 	settings_dim.visible = false
 	# gentle idle motion so the menu feels alive
 	var tw := create_tween().set_loops()
-	tw.tween_property(title_label, "position:y", title_label.position.y - 4.0, 1.4).set_trans(Tween.TRANS_SINE)
-	tw.tween_property(title_label, "position:y", title_label.position.y, 1.4).set_trans(Tween.TRANS_SINE)
+	# relative moves: the menu container may still be laying out at this point
+	tw.tween_property(title_label, "position:y", -4.0, 1.4).as_relative().set_trans(Tween.TRANS_SINE)
+	tw.tween_property(title_label, "position:y", 4.0, 1.4).as_relative().set_trans(Tween.TRANS_SINE)
 	var ft := create_tween().set_loops()
 	ft.tween_property(farmer, "scale", Vector2(1.0, 1.02), 0.9).set_trans(Tween.TRANS_SINE)
 	ft.tween_property(farmer, "scale", Vector2.ONE, 0.9).set_trans(Tween.TRANS_SINE)
@@ -101,6 +105,7 @@ func _on_settings_open() -> void:
 	Controls.focus(volume_slider)
 
 func _on_settings_close() -> void:
+	SaveSystem.save_game()
 	Audio.play_sfx("click")
 	settings_panel.visible = false
 	settings_dim.visible = false
@@ -109,13 +114,12 @@ func _on_settings_close() -> void:
 
 ## Keep keyboard focus trapped inside the settings panel while it is open.
 func _set_menu_focusable(on: bool) -> void:
-	for c in $VBox.get_children():
+	for c in $VBox.get_children() + $VBox/MenuGrid.get_children():
 		if c is Button:
 			(c as Button).focus_mode = Control.FOCUS_ALL if on else Control.FOCUS_NONE
 
 func _on_volume_changed(value: float) -> void:
-	var bus := AudioServer.get_bus_index("Master")
-	AudioServer.set_bus_volume_db(bus, linear_to_db(clampf(value, 0.01, 1.0)))
+	SaveSystem.set_volume(value)
 
 func _on_exit() -> void:
 	get_tree().quit()

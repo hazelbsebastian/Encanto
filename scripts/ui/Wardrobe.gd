@@ -45,7 +45,7 @@ func _refresh_category(cat: String) -> void:
 
 		var status_label := Label.new()
 		var action_button := Button.new()
-		action_button.custom_minimum_size = Vector2(130, 42)
+		action_button.custom_minimum_size = Vector2(130, UIKit.MIN_TOUCH)
 		var unlocked: bool = SaveSystem.is_unlocked(item_id)
 		var is_equipped: bool = SaveSystem.equipped.get(cat, "") == item_id
 

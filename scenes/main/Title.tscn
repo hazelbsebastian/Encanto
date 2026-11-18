@@ -127,29 +127,39 @@ custom_minimum_size = Vector2(0, 4)
 
 [node name="PlayButton" type="Button" parent="VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 60)
 theme_type_variation = &"GoldButton"
 theme_override_font_sizes/font_size = 24
 text = "MAGLARO"
 
-[node name="WardrobeButton" type="Button" parent="VBox"]
+[node name="MenuGrid" type="GridContainer" parent="VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 42)
+theme_override_constants/h_separation = 9
+theme_override_constants/v_separation = 9
+columns = 2
+
+[node name="WardrobeButton" type="Button" parent="VBox/MenuGrid"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 60)
+size_flags_horizontal = 3
 text = "WARDROBE"
 
-[node name="ProfileButton" type="Button" parent="VBox"]
+[node name="ProfileButton" type="Button" parent="VBox/MenuGrid"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 60)
+size_flags_horizontal = 3
 text = "PROFILE"
 
-[node name="SettingsButton" type="Button" parent="VBox"]
+[node name="SettingsButton" type="Button" parent="VBox/MenuGrid"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 60)
+size_flags_horizontal = 3
 text = "SETTINGS"
 
-[node name="ExitButton" type="Button" parent="VBox"]
+[node name="ExitButton" type="Button" parent="VBox/MenuGrid"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 60)
+size_flags_horizontal = 3
 text = "EXIT"
 
 [node name="KeysHint" type="Label" parent="VBox"]
@@ -171,9 +181,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -230.0
-offset_top = -170.0
+offset_top = -200.0
 offset_right = 230.0
-offset_bottom = 170.0
+offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -194,7 +204,7 @@ text = "Lakas ng tunog (Volume)"
 
 [node name="VolumeSlider" type="HSlider" parent="SettingsPanel/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 40)
 max_value = 1.0
 step = 0.05
 value = 0.8
@@ -219,5 +229,5 @@ i-drag ang screen para iikot ang camera"
 
 [node name="CloseButton" type="Button" parent="SettingsPanel/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 46)
+custom_minimum_size = Vector2(0, 60)
 text = "ISARA"
