@@ -24,6 +24,7 @@ var _tiles: Array[Button] = []
 var _selected: int = -1
 var _moves: int = 0
 var _solved: bool = false
+var _finished: bool = false
 var _moves_label: Label
 var _hint_label: Label
 
@@ -111,6 +112,8 @@ func _show_congrats() -> void:
 
 # -------------------------------------------------------- 2) PUZZLE ------
 func _show_puzzle() -> void:
+	if not _tiles.is_empty():
+		return   # Week 15 fix D02: a double-tap must not rebuild/re-scramble it
 	Audio.play_sfx("click")
 	Audio.play_voice("narrator_buuin")
 	var v := _new_screen(Vector2(740, 0))
@@ -260,7 +263,13 @@ func _show_reveal() -> void:
 	UIKit.key_hint(v, "ENTER / tap")
 	Controls.focus(go)
 
+## Week 15 fix D02: a fast double-tap (or Enter + tap) on "Laban na!" ran
+## this twice before queue_free() took effect, so `completed` fired twice
+## and the level skipped a whole stage (Tyanak -> Tikbalang).
 func _finish() -> void:
+	if _finished:
+		return
+	_finished = true
 	Audio.play_sfx("click")
 	Audio.play_voice("narrator_laban")
 	get_tree().paused = false

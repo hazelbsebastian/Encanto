@@ -290,6 +290,8 @@ func _start_puzzle(stage: String) -> void:
 	add_child(puzzle)
 
 func _on_puzzle_completed() -> void:
+	if not _stage_clearing:
+		return   # Week 15 fix D02: one stage clear = one stage advance
 	_stage_clearing = false
 	GameManager.advance_stage()
 	_start_stage()
