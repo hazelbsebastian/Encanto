@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Student | Sebastian, Hazel B. - BSIT-4A - [Student Number] |
+| Student | Sebastian, Hazel B. - BSIT-4A - 23-10584 |
 | Game title | Encanto |
 | Theme | Philippine Games and Sports |
 | Platform | Android (target), Windows (development and testing) |
