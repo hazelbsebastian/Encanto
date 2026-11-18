@@ -276,7 +276,13 @@ func hit_player(times: int = 1) -> void:
 		a.queue_free()
 
 ## Jumps straight to the boss stage (skipping 3 waves) with charge ready.
+## In the real game the boss starts only after the Tikbalang wave is cleared,
+## so leftover wave-1 creatures are removed first.
 func go_to_boss() -> void:
+	_level.set("_spawned_this_stage", GameManager.ENEMIES_PER_STAGE)
+	for e in get_tree().get_nodes_in_group("enemies"):
+		e.free()
+	(_level.get("_active_enemies") as Array).clear()
 	GameManager.current_stage_index = 3
 	_level.call("_start_stage")
 

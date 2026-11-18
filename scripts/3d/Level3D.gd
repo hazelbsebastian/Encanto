@@ -328,6 +328,8 @@ func _start_boss() -> void:
 	rig.call("release", 1.0)
 	await get_tree().create_timer(1.0, false).timeout
 	player.set("controls_enabled", true)
+	if is_instance_valid(kapre) and not bool(kapre.get("is_dead")):
+		kapre.set("attacking", true)   # D04: only once the player can move
 
 func _on_tree_needs_charge() -> void:
 	show_dialogue("Hindi tinatablan! Kailangan ng CHARGED SHOT (hawakan ang X).", 3.0)

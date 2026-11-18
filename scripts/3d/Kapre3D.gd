@@ -7,6 +7,9 @@ extends Enemy3D
 const SMOKE_SCRIPT := preload("res://scripts/3d/Smoke3D.gd")
 
 var _attack_t: float = 2.5
+## Week 15 fix D04: false during the intro cut-scene (the player cannot move
+## yet) and after the tree is felled. Level3D switches it on and off.
+var attacking: bool = false
 var _laugh_t: float = 4.0
 
 func _build() -> void:
@@ -43,6 +46,8 @@ func _think(delta: float) -> void:
 	torso.rotation_degrees.z = sin(_anim_t * 1.2) * 3.0
 	var ember: Node3D = j["ember"]
 	ember.scale = Vector3.ONE * (1.0 + sin(_anim_t * 5.0) * 0.25)
+	if not attacking:
+		return
 	_attack_t -= delta
 	if _attack_t <= 0.0:
 		_attack_t = randf_range(2.2, 3.6)
