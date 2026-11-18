@@ -12,6 +12,18 @@ const CHARGE_TEX := preload("res://assets/ui/button_charge.png")
 
 const PRESSED_TINT := Color(1.35, 1.3, 1.1)
 
+## Week 14 accessibility: hint text was 12 px light text straight on the 3D
+## scene (hard to read on grass/sand) and always named keyboard keys, even on
+## phones. Now: 15 px on a dark chip, placed under its control, and worded
+## for the input the player is using (see Controls.touch_mode).
+const HINT_FONT := 15
+const HINT_TEXT := {
+	"touch": {"MoveKey": "GALAW", "ShootKey": "TIRA", "JumpKey": "TALON", "PauseKey": "HINTO",
+		"LookHint": "I-drag ang screen para iikot ang camera"},
+	"keys": {"MoveKey": "WASD / ← ↑ → ↓", "ShootKey": "X", "JumpKey": "SPACE", "PauseKey": "ESC",
+		"LookHint": "Q / E o i-drag ang screen para iikot ang camera"},
+}
+
 @onready var hearts_box: HBoxContainer = $HeartsChip/HeartsBox
 @onready var puzzle_chip: PanelContainer = $PuzzleChip
 @onready var puzzle_box: HBoxContainer = $PuzzleChip/PuzzleBox
@@ -39,6 +51,53 @@ func _ready() -> void:
 	jump_button.pressed.connect(_on_jump_pressed)
 	pause_button.pressed.connect(_on_pause_pressed)
 	$LookArea.gui_input.connect(_on_look_input)
+	Controls.input_mode_changed.connect(func(_t: bool) -> void: _apply_hints())
+	get_viewport().size_changed.connect(_layout_hints)
+	_apply_hints()
+
+func _apply_hints() -> void:
+	var words: Dictionary = HINT_TEXT["touch" if Controls.touch_mode else "keys"]
+	for key: String in words:
+		var l := get_node_or_null(key) as Label
+		if l == null:
+			continue
+		l.text = words[key]
+		l.add_theme_font_size_override("font_size", HINT_FONT)
+		l.add_theme_color_override("font_color", Color(1, 0.96, 0.87))
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.08, 0.05, 0.03, 0.82)
+		sb.set_corner_radius_all(8)
+		sb.content_margin_left = 8
+		sb.content_margin_right = 8
+		sb.content_margin_top = 2
+		sb.content_margin_bottom = 3
+		l.add_theme_stylebox_override("normal", sb)
+	_layout_hints.call_deferred()
+
+## Centre each hint under the control it describes, kept inside the screen.
+func _layout_hints() -> void:
+	var view := get_viewport().get_visible_rect().size
+	var pairs := {"MoveKey": joystick, "ShootKey": shoot_button, "JumpKey": jump_button, "PauseKey": pause_button}
+	for key: String in pairs:
+		var l := get_node_or_null(key) as Label
+		var target := pairs[key] as Control
+		if l == null or target == null:
+			continue
+		_place(l, target.get_global_rect(), view)
+	var look := get_node_or_null("LookHint") as Label
+	if look:
+		look.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		look.size = Vector2.ZERO
+		look.reset_size()
+		look.position = Vector2((view.x - look.size.x) * 0.5, view.y - look.size.y - 8)
+
+func _place(l: Label, under: Rect2, view: Vector2) -> void:
+	l.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	l.size = Vector2.ZERO
+	l.reset_size()
+	var x := under.get_center().x - l.size.x * 0.5
+	var y := under.end.y + 2
+	l.position = Vector2(clampf(x, 4, view.x - l.size.x - 4), minf(y, view.y - l.size.y - 2))
 
 func _process(_delta: float) -> void:
 	var player := get_tree().get_first_node_in_group("player")

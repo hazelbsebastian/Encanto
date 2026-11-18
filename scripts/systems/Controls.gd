@@ -50,8 +50,17 @@ const HINTS := {
 	"pause": "ESC",
 }
 
+## Week 14 (accessibility): on-screen hints follow the input the player is
+## actually using. Phones show touch words (TIRA, TALON); keyboard players see
+## key names (X, SPACE). Switches automatically on the last input type.
+signal input_mode_changed(touch: bool)
+var touch_mode: bool = false
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	touch_mode = DisplayServer.is_touchscreen_available()
+	if OS.get_cmdline_user_args().has("--force-touch"):
+		touch_mode = true
 	for action: String in KEY_BINDINGS:
 		_ensure_action(action)
 		for key: int in KEY_BINDINGS[action]:
@@ -98,3 +107,13 @@ func focus(control: Control) -> void:
 func _focus_later(control: Control) -> void:
 	if is_instance_valid(control) and control.is_visible_in_tree() and control.focus_mode != Control.FOCUS_NONE:
 		control.grab_focus()
+
+func _input(event: InputEvent) -> void:
+	var touch := touch_mode
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		touch = true
+	elif event is InputEventKey or event is InputEventJoypadButton:
+		touch = false
+	if touch != touch_mode:
+		touch_mode = touch
+		input_mode_changed.emit(touch_mode)
