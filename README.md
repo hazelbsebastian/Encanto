@@ -5,11 +5,25 @@
 | Student | Sebastian, Hazel B. - BSIT-4A - 23-10584 |
 | Game title | Encanto |
 | Theme | Philippine Games and Sports |
-| Platform | Android (target), Windows (development and testing) |
+| Platform | Android (APK) and Windows (exe) - same project, same commit |
 | Engine | Godot 4.7.2 (GL Compatibility renderer) |
-| Version | 0.13.0 (Week 13) - tag `v0.13.0-week13` |
+| Version | 0.14.0 (Week 14) - tags `v0.13.0-week13`, `v0.14.0-week14` |
 | Repository | https://github.com/hazelbsebastian/Encanto |
 | Current commit | see `git log -1` / the Week 13 submission README |
+
+## Weekly log
+
+| Week | Output | Tag | Main changes |
+|---|---|---|---|
+| 13 | SA5, PT5 | `v0.13.0-week13` | Local player profiles, encrypted saves, 18 tests, debug APK |
+| 14 | PT6 | `v0.14.0-week14` | Accessibility fixes (48 dp touch targets, readable touch/keyboard hints, 13.6:1 contrast, volume saved per profile, auto-pause), Windows build, playtesting kit |
+
+## Install (Windows)
+
+1. Unzip `Sebastian_Hazel_PT6_Windows.zip`.
+2. Run `Encanto/Encanto.exe` (keep `Encanto.pck` next to it).
+   Windows may show "Windows protected your PC" because the exe is unsigned:
+   More info -> Run anyway.
 
 ## Install (Android)
 
@@ -19,6 +33,19 @@
 
 Build it yourself: Godot 4.7.2 + Android export templates, then
 `Project > Export > Android` (preset included; arm64-v8a + armeabi-v7a).
+
+## Week 14 changes - usability and accessibility (PT6)
+
+- **Touch targets:** everything tappable is at least 60 canvas px (about
+  48 dp on a phone, the Android minimum). Title menu is now a 2x2 grid.
+- **Hints:** on-screen hints are 15 px on a dark chip and follow the input in
+  use - TIRA / TALON / GALAW / HINTO on touch, X / SPACE / WASD / ESC on
+  keyboard (`Controls.touch_mode`).
+- **Volume** is saved per profile (was reset every launch).
+- **Auto-pause** when the app loses focus (phone call, home button, alt-tab).
+- **Audit tool:** `tests/AccessibilityAudit.tscn` measures every button and
+  label on the real screens and saves screenshots.
+- Tests: 20 automated cases (T19-T20 for volume), all passing.
 
 ## Week 13 changes - local player profiles (PT5)
 
@@ -125,6 +152,9 @@ stage, streak), `SaveSystem` (local profiles + encrypted per-profile saves),
   leaderboard, no purchases), but it would not be enough for online data.
 - No cloud backup: uninstalling the game or clearing app data deletes all
   profiles.
+- The charged throw needs press-and-hold; there is no tap-to-toggle option yet
+  (players with limited hand control may find it hard).
+- Text size cannot be changed in settings.
 - The Week 13 APK is a debug build (signed with the Android debug key). A
   release keystore is needed for Week 17 and must never be committed.
 
