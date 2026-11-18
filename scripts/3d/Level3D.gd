@@ -136,6 +136,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		open_pause_menu()
 
+## Week 14 (pause behaviour): leaving the app - a call, a notification, the
+## home button, or alt-tab on PC - pauses the fight instead of letting the
+## creatures keep attacking while the player is away.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
+		if is_inside_tree() and hud != null:
+			open_pause_menu()
+
 ## Also called by the HUD's on-screen pause button.
 func open_pause_menu() -> void:
 	if get_tree().paused or not hud.visible or bool(player.get("is_dead")):

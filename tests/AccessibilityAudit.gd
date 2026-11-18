@@ -43,7 +43,12 @@ func _ready() -> void:
 		waited += 1
 	if lvl:
 		await _audit_existing(lvl, "gameplay_hud")
-		lvl.open_pause_menu()
+		# simulate the app losing focus (phone call / home button / alt-tab)
+		lvl.notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
+		await get_tree().process_frame
+		_report.append("CHECK   app focus-out pauses the game: %s" % ("PASS" if get_tree().paused else "FAIL"))
+		if not get_tree().paused:
+			lvl.open_pause_menu()
 		await _audit_existing(lvl, "pause_menu")
 	if lvl:
 		get_tree().paused = false
