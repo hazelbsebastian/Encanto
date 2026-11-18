@@ -15,6 +15,17 @@ extends Control
 static var _welcomed: bool = false
 
 func _ready() -> void:
+	# Week 13: every run belongs to a local profile. First launch (or after
+	# signing out / deleting the active profile) goes to the profile screen.
+	if not SaveSystem.has_active_profile():
+		get_tree().change_scene_to_file.call_deferred("res://scenes/ui/ProfileSelect.tscn")
+		return
+	$PlayerChip/PlayerLabel.text = "Player: %s" % SaveSystem.active_profile_name()
+	$VBox/ProfileButton.pressed.connect(_on_profile)
+	SaveSystem.save_failed.connect(_on_save_failed)
+	var notice := SaveSystem.take_notice()
+	if notice != "":
+		_toast(notice)
 	money_label.text = "₱%d" % SaveSystem.money
 	play_button.pressed.connect(_on_play)
 	$VBox/WardrobeButton.pressed.connect(_on_wardrobe)
@@ -49,6 +60,33 @@ func _unhandled_input(event: InputEvent) -> void:
 func _on_play() -> void:
 	Audio.play_sfx("click")
 	get_tree().change_scene_to_file("res://scenes/jeepney/JeepneyIntro.tscn")
+
+func _on_profile() -> void:
+	Audio.play_sfx("click")
+	get_tree().change_scene_to_file("res://scenes/ui/ProfileSelect.tscn")
+
+func _on_save_failed(message: String) -> void:
+	_toast(message)
+
+## Small message at the bottom of the screen that fades out by itself.
+func _toast(text: String) -> void:
+	var chip := PanelContainer.new()
+	chip.theme_type_variation = "HudChip"
+	# bottom-right, clear of the menu column on the left
+	chip.anchor_left = 1.0
+	chip.anchor_right = 1.0
+	chip.anchor_top = 1.0
+	chip.anchor_bottom = 1.0
+	chip.offset_left = -520
+	chip.offset_right = -16
+	chip.offset_top = -64
+	chip.offset_bottom = -16
+	UIKit.label(chip, text, "HudLabel", 15)
+	add_child(chip)
+	var tw := chip.create_tween()
+	tw.tween_interval(4.0)
+	tw.tween_property(chip, "modulate:a", 0.0, 0.6)
+	tw.tween_callback(chip.queue_free)
 
 func _on_wardrobe() -> void:
 	Audio.play_sfx("click")
