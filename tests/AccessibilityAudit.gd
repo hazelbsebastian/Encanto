@@ -43,6 +43,16 @@ func _ready() -> void:
 		waited += 1
 	if lvl:
 		await _audit_existing(lvl, "gameplay_hud")
+		if tag != "before":
+			# first-enemy tip appears ~2.6 s after the stage starts
+			await get_tree().create_timer(2.0).timeout
+			await _shot_only("first_enemy_tip")
+			# hit confirmation + losing a heart, captured mid-effect
+			lvl.hud.show_hit_confirm()
+			GameManager.damage_player(1)
+			for i in 6:
+				await get_tree().process_frame
+			await _shot_only("hit_and_hurt_feedback", 0)
 		# simulate the app losing focus (phone call / home button / alt-tab)
 		lvl.notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
 		await get_tree().process_frame
@@ -101,3 +111,9 @@ func _wipe() -> void:
 	if d:
 		for f in d.get_files():
 			d.remove(f)
+
+func _shot_only(name: String, frames: int = 20) -> void:
+	for i in frames:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(out_dir.path_join("%s_%s.png" % [tag, name]))
+
