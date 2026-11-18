@@ -28,6 +28,10 @@ func _ready() -> void:
 	SaveSystem.create_profile("Tester")
 
 	await _audit("res://scenes/main/Title.tscn", "title")
+	if tag != "before":
+		for n in ["Ana", "Ben", "Cara"]:
+			SaveSystem.create_profile(n)
+		await _audit("res://scenes/ui/ProfileSelect.tscn", "profiles_full")
 	GameManager.reset_run()
 	GameManager.chosen_map_id = "banaue"
 	GameManager.chosen_map_name = "Banaue Rice Terraces"
