@@ -36,7 +36,7 @@ func _ready() -> void:
 	controls.theme_type_variation = "CardPanel"
 	v.add_child(controls)
 	# Week 14: describe the controls the player is actually using
-	var help := "GALAW: joystick sa kaliwa    TALON: berdeng button\nTIRA: pulang button (hawakan para mag-charge)\nCamera: i-drag ang screen    HINTO: II sa itaas"
+	var help := "GALAW: joystick    TALON: berde    TIRA: pula\nHawakan ang TIRA para mag-charge\nCamera: i-drag ang screen    HINTO: II sa itaas"
 	if not Controls.touch_mode:
 		help = "Galaw: WASD o ← ↑ → ↓    Talon: SPACE\nTira: X (hawakan para mag-charge)\nCamera: Q / E o i-drag ang screen    Hinto: ESC / P"
 	UIKit.label(controls, help, "HintLabel", 15)
