@@ -14,6 +14,7 @@ func setup(dir: Vector3) -> void:
 	direction = dir.normalized()
 
 func _ready() -> void:
+	add_to_group("boss_smoke")
 	collision_layer = 8
 	collision_mask = 0
 	monitoring = false

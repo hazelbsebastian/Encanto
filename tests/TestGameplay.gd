@@ -679,6 +679,13 @@ func n11_boss_intro_frozen() -> void:
 	check(smoke_seen == 0, "no smoke while the player cannot move")
 	check(hearts_lost == 0, "no hearts lost during the intro")
 
+func _smoke_at_player(from_offset: Vector3) -> void:
+	var s := Area3D.new()
+	s.set_script(load("res://scripts/3d/Smoke3D.gd"))
+	s.call("setup", -from_offset.normalized())
+	_level.world.add_child(s)
+	s.global_position = _level.player.global_position + Vector3(0, 0.9, 0) + from_offset
+
 func n12_smoke_after_win() -> void:
 	await start_level()
 	go_to_boss()
@@ -687,16 +694,17 @@ func n12_smoke_after_win() -> void:
 	var tree: Node = get_tree().get_first_node_in_group("charged_targets")
 	for i in range(4):
 		tree.call("take_damage", 3, true, Vector3.ZERO)
-	# the tree takes ~2.3 s to fall; meanwhile a smoke ring is already flying at
-	# the player (the Kapre attacks every 2.2-3.6 s)
+	# (a) a smoke ring already flying when the last charged hit lands; the
+	#     tree takes ~2.3 s to fall
+	_smoke_at_player(Vector3(0, 0, -2.0))
+	await wait(1.0)
+	var during := GameManager.current_hearts
+	# (b) a ring that reaches the player after the boss is beaten
 	await wait_until(func() -> bool: return SaveSystem.game_completed, 5.0)
-	var s := Area3D.new()
-	s.set_script(load("res://scripts/3d/Smoke3D.gd"))
-	s.call("setup", Vector3(0, 0, 1))
-	_level.world.add_child(s)
-	s.global_position = _level.player.global_position + Vector3(0, 0.9, -2.0)
+	_smoke_at_player(Vector3(0, 0, -2.0))
 	await wait(1.5)
-	note("hearts after victory: %d, player dead: %s, game over shown: %s" % [GameManager.current_hearts, _level.player.get("is_dead"), game_over_shown()])
+	note("hearts: during tree fall %d, after victory %d | player dead: %s | game over shown: %s" % [during, GameManager.current_hearts, _level.player.get("is_dead"), game_over_shown()])
+	check(during == 1, "no heart lost while the tree falls")
 	check(GameManager.current_hearts == 1, "no heart lost after winning")
 	check(not game_over_shown(), "no Game Over after winning")
 

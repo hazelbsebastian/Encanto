@@ -8,6 +8,9 @@ signal player_died
 const INVULN_TIME := 1.1
 
 var invulnerable: bool = false
+## Week 15 fix D05: switched off once the boss is beaten so nothing that is
+## still flying can hurt the player after the win.
+var enabled: bool = true
 var _flash_time: float = 0.0
 
 @onready var player: CharacterBody3D = get_parent()
@@ -36,7 +39,7 @@ func _process(delta: float) -> void:
 		model.visible = true
 
 func _on_area_entered(area: Area3D) -> void:
-	if invulnerable or bool(player.get("is_dead")):
+	if not enabled or invulnerable or bool(player.get("is_dead")):
 		return
 	Audio.play_sfx("damage")
 	Audio.play_voice("player_aray")

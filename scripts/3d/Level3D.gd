@@ -316,6 +316,7 @@ func _start_boss() -> void:
 	world.add_child(kapre)
 	_kapre = kapre
 	tree.connect("needs_charge", _on_tree_needs_charge)
+	tree.connect("felled", _end_boss_danger)
 	tree.connect("fallen", _on_tree_fallen)
 	# boss intro shot
 	player.set("controls_enabled", false)
@@ -334,12 +335,25 @@ func _start_boss() -> void:
 func _on_tree_needs_charge() -> void:
 	show_dialogue("Hindi tinatablan! Kailangan ng CHARGED SHOT (hawakan ang X).", 3.0)
 
+## Week 15 fix D05: the fight is decided the moment the last charged hit
+## lands. Before, the Kapre kept blowing smoke during the 2.3 s fall and the
+## rings already in the air could still hit the (now frozen) player, so a
+## player on 1 heart got Game Over AFTER winning (N12).
+func _end_boss_danger() -> void:
+	if is_instance_valid(_kapre):
+		_kapre.set("attacking", false)
+	for s in get_tree().get_nodes_in_group("boss_smoke"):
+		FX.puff(world, (s as Node3D).global_position, Color(0.8, 0.8, 0.82), 0.6, 5)
+		s.queue_free()
+	player.get_node("Hurtbox").set("enabled", false)
+
 func _on_tree_fallen() -> void:
 	if is_instance_valid(_kapre):
 		_kapre.call("force_defeat")
 	_on_boss_defeated()
 
 func _on_boss_defeated() -> void:
+	_end_boss_danger()
 	SaveSystem.mark_enemy_completed("kapre")
 	SaveSystem.mark_game_completed()
 	player.set("controls_enabled", false)

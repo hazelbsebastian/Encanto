@@ -4,6 +4,9 @@ extends Node3D
 ## charged hits it shakes, creaks and falls, and `fallen` is emitted.
 
 signal fallen
+## Emitted the moment the last charged hit lands (the fall animation that
+## ends with `fallen` takes another ~2.3 s).
+signal felled
 signal needs_charge
 
 @export var hits_to_fell: int = 4
@@ -93,6 +96,7 @@ func take_damage(_amount: int, is_charged: bool, _at: Vector3 = Vector3.ZERO) ->
 
 func _fall() -> void:
 	is_felled = true
+	felled.emit()
 	remove_from_group("charged_targets")
 	_label.visible = false
 	Audio.play_3d("tree_fall", get_aim_point(), 8.0)
