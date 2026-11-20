@@ -7,9 +7,9 @@
 | Theme | Philippine Games and Sports |
 | Platform | Android (APK) and Windows (exe) - same project, same commit |
 | Engine | Godot 4.7.2 (GL Compatibility renderer) |
-| Version | 0.15.0 (Week 15) - tags `v0.13.0-week13`, `v0.14.1-week14`, `v0.15.0-week15` |
+| Version | 0.16.0 (Week 16) - tags `v0.13.0-week13`, `v0.14.1-week14`, `v0.15.0-week15`, `v0.16.0-week16` |
 | Repository | https://github.com/hazelbsebastian/Encanto |
-| Current commit | see `git log -1`; Week 15 build: tag `v0.15.0-week15` |
+| Current commit | see `git log -1`; Week 16 build: tag `v0.16.0-week16` |
 
 ## Weekly log
 
@@ -18,6 +18,7 @@
 | 13 | SA5, PT5 | `v0.13.0-week13` | Local player profiles, encrypted saves, 18 tests, debug APK |
 | 14 | PT6 | `v0.14.1-week14` | Accessibility fixes (48 dp touch targets, readable touch/keyboard hints, 13.6:1 contrast, volume saved per profile, auto-pause); playtest fixes (hit/miss/damage feedback, first-enemy tip); Windows build |
 | 15 | AS3 milestone | `v0.15.0-week15` | 31 automated gameplay tests + 20 save tests; 5 defects found and fixed (D01-D05); APK also runs on x86_64 (emulator) |
+| 16 | SA6, AS3 report | `v0.16.0-week16` | Repeatable benchmark (`tests/PerfBenchmark.tscn`); static map batching: draw calls -36% in combat, -36% to -55% per map |
 
 ## Install (Windows)
 
@@ -34,6 +35,24 @@
 
 Build it yourself: Godot 4.7.2 + Android export templates, then
 `Project > Export > Android` (preset included; arm64-v8a + armeabi-v7a + x86_64).
+
+## Week 16 changes - performance (SA6 / AS3 report)
+
+- **Benchmark** `tests/PerfBenchmark.tscn` (needs a window, not headless):
+  loads all 5 maps (load time + 3 s view each), then 60 s of scripted combat
+  and 15 s of the boss on Banaue. Writes per-frame CSV + summary to
+  `user://perf/`. Run:
+  `Godot_v4.7.2-stable_win64_console.exe --path . res://tests/PerfBenchmark.tscn -- --label=mytest`
+  (add `--no-bake` to switch optimisation O1 off for an A/B run).
+- **O1 static batching** (`M3.bake_static`, called from `MapBuilder3D.build`):
+  static, opaque map parts are merged into one mesh per material and per 64 m
+  cell. Draw calls: combat 547 -> 350, Mayon 620 -> 293, Boracay 433 -> 197.
+  Trade-off: more triangles are drawn (coarser culling) and map build takes
+  30-60 ms longer. Tweened boats/foam and transparent parts are not merged.
+- **Found, not fixed yet:** memory grows about 32-38 MB during the 75 s run
+  with a stable node count; a 100-150 ms stutter when the boss stage starts
+  and 45-70 ms when the first puzzle opens; the APK is 105 MB because it
+  carries the engine for 3 CPU types (84 MB).
 
 ## Week 15 changes - testing and defect correction (AS3 milestone)
 
