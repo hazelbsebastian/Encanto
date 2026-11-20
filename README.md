@@ -19,7 +19,7 @@
 | 14 | PT6 | `v0.14.1-week14` | Accessibility fixes (48 dp touch targets, readable touch/keyboard hints, 13.6:1 contrast, volume saved per profile, auto-pause); playtest fixes (hit/miss/damage feedback, first-enemy tip); Windows build |
 | 15 | AS3 milestone | `v0.15.0-week15` | 31 automated gameplay tests + 20 save tests; 5 defects found and fixed (D01-D05); APK also runs on x86_64 (emulator) |
 | 16 | SA6, AS3 report | `v0.16.0-week16` | Repeatable benchmark (`tests/PerfBenchmark.tscn`); static map batching: draw calls -36% in combat, -36% to -55% per map |
-| 17 | PT7 release candidate | `v1.0.0-rc1` | Feature freeze; How to Play + Credits; fixes D08 (fire rate), B3 (boss stutter), Kerchief icon; 2D prototype removed; release-signed arm64 APK (47 MB) |
+| 17 | PT7 release candidate | `v1.0.0-rc1` | Feature freeze; How to Play + Credits; fixes D08 (fire rate), B3 (boss stutter), Kerchief icon; 2D prototype removed; release-signed arm64 APK (44.6 MB) |
 
 ## Install (Windows)
 
@@ -58,7 +58,7 @@ Feature freeze: no new gameplay. Only corrective changes and release work:
 - **Kerchief** has its own wardrobe icon.
 - **Repository cleanup:** the unused 2D prototype (old `Level.tscn`, 2D
   player/enemy scenes and scripts, 50 sprite frames) was removed.
-- **Release build:** release-signed, arm64-v8a only (47 MB instead of 105 MB);
+- **Release build:** release-signed, arm64-v8a only (44.6 MB instead of 105 MB);
   a separate x86_64 build of the same commit for the emulator.
 
 ## Week 16 changes - performance (SA6 / AS3 report)
