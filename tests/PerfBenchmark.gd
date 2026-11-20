@@ -137,7 +137,15 @@ func _play(duration: float, boss: bool) -> void:
 	var t := 0.0
 	var shot_t := 0.0
 	var held := false
+	var wall_start := Time.get_ticks_msec()
+	var next_log := 0.0
 	while t < duration:
+		if t >= next_log:
+			print("[bench] %s t=%.0f s stage=%d paused=%s" % [phase, t, GameManager.current_stage_index, get_tree().paused])
+			next_log += 10.0
+		if Time.get_ticks_msec() - wall_start > int(duration * 1000) + 60000:
+			push_warning("benchmark guard: %s did not finish in time" % phase)
+			return
 		await get_tree().process_frame
 		if not is_instance_valid(_level) or not _level.is_inside_tree():
 			push_warning("level left the tree at %s t=%.1f" % [phase, t])
@@ -145,6 +153,7 @@ func _play(duration: float, boss: bool) -> void:
 		var dt := get_process_delta_time()
 		var p := _puzzle()
 		if p != null:
+			print("[bench] puzzle at t=%.1f" % t)
 			await _solve(p)
 			continue
 		if get_tree().paused:
