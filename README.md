@@ -7,9 +7,9 @@
 | Theme | Philippine Games and Sports |
 | Platform | Android (APK) and Windows (exe) - same project, same commit |
 | Engine | Godot 4.7.2 (GL Compatibility renderer) |
-| Version | 0.16.0 (Week 16) - tags `v0.13.0-week13`, `v0.14.1-week14`, `v0.15.0-week15`, `v0.16.0-week16` |
+| Version | **1.0.0-rc1** (Week 17 release candidate, Android versionCode 18) - tags `v0.13.0-week13` ... `v0.16.0-week16`, `v1.0.0-rc1` |
 | Repository | https://github.com/hazelbsebastian/Encanto |
-| Current commit | see `git log -1`; Week 16 build: tag `v0.16.0-week16` |
+| Current commit | see `git log -1`; release candidate: tag `v1.0.0-rc1` |
 
 ## Weekly log
 
@@ -19,22 +19,47 @@
 | 14 | PT6 | `v0.14.1-week14` | Accessibility fixes (48 dp touch targets, readable touch/keyboard hints, 13.6:1 contrast, volume saved per profile, auto-pause); playtest fixes (hit/miss/damage feedback, first-enemy tip); Windows build |
 | 15 | AS3 milestone | `v0.15.0-week15` | 31 automated gameplay tests + 20 save tests; 5 defects found and fixed (D01-D05); APK also runs on x86_64 (emulator) |
 | 16 | SA6, AS3 report | `v0.16.0-week16` | Repeatable benchmark (`tests/PerfBenchmark.tscn`); static map batching: draw calls -36% in combat, -36% to -55% per map |
+| 17 | PT7 release candidate | `v1.0.0-rc1` | Feature freeze; How to Play + Credits; fixes D08 (fire rate), B3 (boss stutter), Kerchief icon; 2D prototype removed; release-signed arm64 APK (47 MB) |
 
 ## Install (Windows)
 
-1. Unzip `Sebastian_Hazel_AS3_Windows.zip`.
+1. Unzip `Sebastian_Hazel_PT7_Windows.zip`.
 2. Run `Encanto/Encanto.exe` (keep `Encanto.pck` next to it).
    Windows may show "Windows protected your PC" because the exe is unsigned:
    More info -> Run anyway.
 
 ## Install (Android)
 
-1. Copy `Sebastian_Hazel_AS3.apk` to the phone (Android 7.0 or newer; ARM phones, or an x86_64 emulator).
+1. Copy `Sebastian_Hazel_PT7.apk` to the phone (Android 7.0 or newer, 64-bit ARM - almost every phone
+   since 2017). For the Android emulator (x86_64) use `Sebastian_Hazel_PT7_emulator_x86_64.apk`.
 2. Allow "Install unknown apps" for your file manager, then open the APK.
 3. The app requests no permissions (no internet access).
 
 Build it yourself: Godot 4.7.2 + Android export templates, then
-`Project > Export > Android` (preset included; arm64-v8a + armeabi-v7a + x86_64).
+`Project > Export > Android` (arm64-v8a) or `Android x86_64 (emulator test)`.
+Release signing: the keystore is NOT in the repository. Set
+`GODOT_ANDROID_KEYSTORE_RELEASE_PATH`, `GODOT_ANDROID_KEYSTORE_RELEASE_USER` and
+`GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD`, then export with "Export Release"
+(or use "Export Debug", which signs with the Android debug key).
+
+## Week 17 changes - release candidate (PT7)
+
+Feature freeze: no new gameplay. Only corrective changes and release work:
+- **How to Play and Credits** (Settings -> PAANO MAGLARO / CREDITS): goal,
+  steps, touch + keyboard controls, saving; credits for author, engine
+  (Godot MIT license text included), generated art/audio, TTS voices,
+  folklore and places, AI-assistance disclosure. Test F17.
+- **D08 fixed:** one normal rock per 0.18 s (40 taps in one frame = 1 rock). Test N16.
+- **B3 fixed (Week 16 stutter):** creatures and an omni light are drawn once
+  during the jeepney arrival, so the Kapre's first appearance no longer
+  compiles shaders mid-fight (worst frame 99-155 ms -> 39 ms).
+- **B2 re-checked:** the Week 16 memory growth was mostly the benchmark's own
+  sample buffer; with `--no-store` memory levels off at 106-109 MB.
+- **Kerchief** has its own wardrobe icon.
+- **Repository cleanup:** the unused 2D prototype (old `Level.tscn`, 2D
+  player/enemy scenes and scripts, 50 sprite frames) was removed.
+- **Release build:** release-signed, arm64-v8a only (47 MB instead of 105 MB);
+  a separate x86_64 build of the same commit for the emulator.
 
 ## Week 16 changes - performance (SA6 / AS3 report)
 
@@ -117,8 +142,8 @@ synthesized — nothing is a placeholder box.
 
 ## How to open
 
-1. Install **Godot 4.3+** (Forward+/Compatibility, either works — the
-   project is set to GL Compatibility for widest hardware support).
+1. Install **Godot 4.7.2** (the project uses the GL Compatibility renderer
+   for the widest hardware support).
 2. Open Godot -> Import -> select this folder's `project.godot`.
 3. Press **F5** (or the Play button). It starts at the title screen.
    The first launch will take a few extra seconds while Godot imports the
@@ -173,9 +198,10 @@ Kapre boss (dodge random smoke attacks, break the tree with charged shots)
 ## Project layout
 
 ```
-scenes/   main/ player/ jeepney/ maps/ enemies/ ui/ puzzles/
-scripts/  player/ enemies/ systems/ ui/
-assets/   player/ enemies/ maps/ jeepney/ weapons/ ui/ audio/
+scenes/   3d/ (Level3D) main/ jeepney/ ui/ puzzles/
+scripts/  3d/ (models, map builder, creatures, player) systems/ ui/
+assets/   maps/ (2D backgrounds) puzzles/ ui/ audio/ player/ jeepney/ shaders/
+tests/    TestGameplay (33), TestProfiles (20), PerfBenchmark, AccessibilityAudit, Capture*
 gen_scripts/   the Python/Pillow tools used to generate every sprite and
                the synthesized SFX (run_all.py -> HD art: gen_maps_hd,
                gen_sprites_hd, gen_portraits) (not part of the Godot project itself -
@@ -199,13 +225,12 @@ stage, streak), `SaveSystem` (local profiles + encrypted per-profile saves),
 - The charged throw needs press-and-hold; there is no tap-to-toggle option yet
   (players with limited hand control may find it hard).
 - Text size cannot be changed in settings.
-- No fire-rate limit on normal shots: tapping very fast fires a rock per
-  tap (40 in one frame in test N01) and builds the 5-shot charge quickly.
-  Deferred to Week 16 (performance and balance).
-- The wardrobe preview shows the Salakot icon for the Traditional Kerchief
-  (the 3D model in the game is correct).
-- The Week 13 APK is a debug build (signed with the Android debug key). A
-  release keystore is needed for Week 17 and must never be committed.
+- Not yet tested on a physical Android phone; Android testing used the
+  emulator (x86_64 build of the same commit). The phone APK is arm64-v8a
+  only, so very old 32-bit-only phones are not supported.
+- Opening the first stage-clear puzzle takes one ~70-80 ms frame (the game is
+  already pausing for the pop-up, so no gameplay is affected).
+- Voices are text-to-speech with phonetic Tagalog spelling, not recordings.
 
 ## Known prototype simplifications
 
