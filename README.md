@@ -7,9 +7,9 @@
 | Theme | Philippine Games and Sports |
 | Platform | Android (APK) and Windows (exe) - same project, same commit |
 | Engine | Godot 4.7.2 (GL Compatibility renderer) |
-| Version | **1.0.0-rc1** (Week 17 release candidate, Android versionCode 18) - tags `v0.13.0-week13` ... `v0.16.0-week16`, `v1.0.0-rc1` |
+| Version | **1.0.0-rc2** (Week 17 release candidate, Android versionCode 19) - tags `v0.13.0-week13` ... `v0.16.0-week16`, `v1.0.0-rc1`, `v1.0.0-rc2` |
 | Repository | https://github.com/hazelbsebastian/Encanto |
-| Current commit | see `git log -1`; release candidate: tag `v1.0.0-rc1` |
+| Current commit | see `git log -1`; release candidate: tag `v1.0.0-rc2` |
 
 ## Weekly log
 
@@ -19,7 +19,7 @@
 | 14 | PT6 | `v0.14.1-week14` | Accessibility fixes (48 dp touch targets, readable touch/keyboard hints, 13.6:1 contrast, volume saved per profile, auto-pause); playtest fixes (hit/miss/damage feedback, first-enemy tip); Windows build |
 | 15 | AS3 milestone | `v0.15.0-week15` | 31 automated gameplay tests + 20 save tests; 5 defects found and fixed (D01-D05); APK also runs on x86_64 (emulator) |
 | 16 | SA6, AS3 report | `v0.16.0-week16` | Repeatable benchmark (`tests/PerfBenchmark.tscn`); static map batching: draw calls -36% in combat, -36% to -55% per map |
-| 17 | PT7 release candidate | `v1.0.0-rc1` | Feature freeze; How to Play + Credits; fixes D08 (fire rate), B3 (boss stutter), Kerchief icon; 2D prototype removed; release-signed arm64 APK (44.6 MB) |
+| 17 | PT7 release candidate | `v1.0.0-rc2` | Feature freeze; How to Play + Credits; fixes D08 (fire rate), B3 (boss stutter), Kerchief icon; 2D prototype removed; release-signed arm64 APK (44.6 MB) |
 
 ## Install (Windows)
 
@@ -56,6 +56,10 @@ Feature freeze: no new gameplay. Only corrective changes and release work:
 - **B2 re-checked:** the Week 16 memory growth was mostly the benchmark's own
   sample buffer; with `--no-store` memory levels off at 106-109 MB.
 - **Kerchief** has its own wardrobe icon.
+- **Theme check (SA5 gap):** How to Play names the Filipino game behind each
+  mechanic (tumbang preso throwing, picture puzzle, Pera o Bayong, Filipino
+  clothing). This text change made rc1 -> rc2; the planned tumbang preso bonus
+  round was NOT added (it would be a new feature after the freeze).
 - **Repository cleanup:** the unused 2D prototype (old `Level.tscn`, 2D
   player/enemy scenes and scripts, 50 sprite frames) was removed.
 - **Release build:** release-signed, arm64-v8a only (44.6 MB instead of 105 MB);
