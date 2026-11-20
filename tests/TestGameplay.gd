@@ -805,7 +805,8 @@ func f17_howto_credits() -> void:
 	check(info != null, "How to Play panel opened")
 	if info:
 		var body := info.find_child("Body", true, false) as Label
-		check(body != null and body.text.contains("LAYUNIN") and body.text.contains("CHARGE"), "instructions text shown")
+		check(body != null and body.text.contains("LAYUNIN") and body.text.contains("CHARGE")
+			and body.text.contains("tumbang preso") and body.text.contains("Pera o Bayong"), "instructions incl. the Filipino game behind each mechanic")
 		for b in info.find_children("*", "Button", true, false):
 			if (b as Button).text == "ISARA":
 				(b as Button).pressed.emit()

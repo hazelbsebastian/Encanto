@@ -27,6 +27,13 @@ PAANO
 5. May 5 PUSO ka. Kapag naubos: Game Over - pwedeng subukan ulit.
 6. Kapag nanalo: piliin ang PERA (P500) o ang BAYONG (random na damit). Gamitin sa WARDROBE.
 
+ANG LARONG PINOY SA ENCANTO
+- Pagbato (TIRA): hango sa tumbang preso - tamaan ang target gamit ang ibinatong bato.
+- Charged throw: ang mataas at malakas na bato sa tumbang preso; ito lang ang tumatama sa puno ng Kapre.
+- Larawang puzzle: brain game na karaniwan sa pista at sa klase.
+- Pera o Bayong: hango sa game show sa TV - siguradong pera o ang misteryosong bayong?
+- Wardrobe: damit Pilipino - barong, salakot, kerchief.
+
 KONTROL - TOUCH
 Joystick sa kaliwa = galaw  |  TIRA at TALON sa kanan  |  i-drag ang screen = camera  |  II = hinto
 
