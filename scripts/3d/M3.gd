@@ -218,3 +218,56 @@ static func _collect(n: Node, out: Array[GeometryInstance3D]) -> void:
 		out.append(n)
 	for c in n.get_children():
 		_collect(c, out)
+
+# ------------------------------------------------------- static batching --
+## Week 16 (SA6 bottleneck B1): every primitive above is its own
+## MeshInstance3D, so a map is 300-660 draw calls per frame (each shadow
+## caster is drawn again in the shadow pass). bake_static() merges the
+## static, opaque parts under `root` into one mesh per material, per shadow
+## setting and per 64 m grid cell (the cell keeps frustum culling useful).
+## Skipped: nodes tagged set_meta("dynamic", true) and their children (tweened
+## boats, foam), transparent or shader materials, meshes with per-surface
+## materials, bodies, lights, particles, MultiMesh. Returns parts merged.
+const BAKE_CELL := 64.0
+
+static func bake_static(root: Node3D) -> int:
+	var groups: Dictionary = {}
+	var merged: Array[MeshInstance3D] = []
+	_bake_collect(root, Transform3D.IDENTITY, groups, merged)
+	var n := 0
+	for key in groups:
+		var g: Dictionary = groups[key]
+		if (g["parts"] as Array).size() < 2:
+			continue   # nothing to gain - leave the original node alone
+		var st := SurfaceTool.new()
+		for part in g["parts"]:
+			st.append_from(part[0], 0, part[1])
+		var mi := MeshInstance3D.new()
+		mi.name = "Baked"
+		mi.mesh = st.commit()
+		mi.material_override = g["mat"]
+		mi.cast_shadow = g["shadow"]
+		root.add_child(mi)
+		for part in g["parts"]:
+			(part[2] as Node).queue_free()
+			n += 1
+	return n
+
+static func _bake_collect(n: Node3D, xform: Transform3D, groups: Dictionary, merged: Array[MeshInstance3D]) -> void:
+	for c in n.get_children():
+		if not (c is Node3D) or c.has_meta("dynamic") or not (c as Node3D).visible:
+			continue
+		var t: Transform3D = xform * (c as Node3D).transform
+		if c is MeshInstance3D:
+			var mi := c as MeshInstance3D
+			var m := mi.material_override as StandardMaterial3D
+			if m == null or mi.get_child_count() > 0 or mi.mesh == null or mi.mesh.get_surface_count() != 1 \
+					or m.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED or mi.material_overlay != null:
+				continue
+			var cell := Vector2i(floori(t.origin.x / BAKE_CELL), floori(t.origin.z / BAKE_CELL))
+			var key := "%d|%d|%s|%d" % [m.get_instance_id(), mi.cast_shadow, mi.mesh.get_class(), cell.x * 1000 + cell.y]
+			if not groups.has(key):
+				groups[key] = {"mat": m, "shadow": mi.cast_shadow, "parts": []}
+			(groups[key]["parts"] as Array).append([mi.mesh, t, mi])
+		elif c.get_class() == "Node3D":
+			_bake_collect(c, t, groups, merged)

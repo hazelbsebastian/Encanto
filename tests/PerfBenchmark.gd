@@ -38,6 +38,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--label="):
 			label = a.trim_prefix("--label=")
+		if a == "--no-bake":   # A/B switch for SA6 optimisation O1
+			MapBuilder3D.bake_static = false
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
 	_vp_rid = get_viewport().get_viewport_rid()
@@ -105,7 +107,10 @@ func _run() -> void:
 		load_lines.append("%-16s build+ready %7.1f ms   first frame drawn %7.1f ms" % [m, (t1 - t0) / 1000.0, (t2 - t0) / 1000.0])
 		await _frames(5)
 		phase = "map_" + m
-		await _wait(3.0)
+		await _wait(1.5)
+		DirAccess.make_dir_recursive_absolute("user://perf")
+		get_viewport().get_texture().get_image().save_png("user://perf/%s_%s.png" % [label, m])
+		await _wait(1.5)
 		phase = ""
 		_level.queue_free()
 		_level = null
@@ -237,6 +242,7 @@ func _write_results() -> void:
 		Engine.get_version_info()["string"], OS.get_name(), Time.get_datetime_string_from_system()])
 	s.append("GPU: %s (%s) | CPU: %s x%d" % [RenderingServer.get_video_adapter_name(), RenderingServer.get_video_adapter_api_version(),
 		OS.get_processor_name(), OS.get_processor_count()])
+	s.append("Static batching (O1): %s" % ("ON" if MapBuilder3D.bake_static else "OFF (--no-bake)"))
 	s.append("Renderer: %s | window %s | vsync off, max_fps 0 | focus pauses dismissed: %d" % [
 		ProjectSettings.get_setting("rendering/renderer/rendering_method"), str(get_window().size), focus_pauses_dismissed])
 	s.append("")

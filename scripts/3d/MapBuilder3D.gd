@@ -12,6 +12,8 @@ extends RefCounted
 
 const ARENA := 21.0
 const WATER_SHADER := preload("res://assets/shaders/water.gdshader")
+## Week 16: merge static map parts into few meshes (see M3.bake_static).
+static var bake_static := true
 
 static func build(root: Node3D, map_id: String) -> Dictionary:
 	seed(hash(map_id))
@@ -35,6 +37,8 @@ static func build(root: Node3D, map_id: String) -> Dictionary:
 			_boracay(root, info)
 		_:
 			_banaue(root, info)
+	if bake_static:
+		info["baked_parts"] = M3.bake_static(root)
 	_ground_collider(root)
 	randomize()
 	return info
@@ -426,6 +430,7 @@ static func _boracay(root: Node3D, info: Dictionary) -> void:
 	var wet := M3.box(root, Vector3(700, 0.02, 4), M3.mat(Color(0.8, 0.76, 0.66), 0.4), Vector3(0, 0.02, 15), Vector3.ZERO, false)
 	wet.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var foam := M3.box(root, Vector3(700, 0.05, 0.5), M3.mat(Color(1, 1, 1, 0.85), 0.5, 0.3), Vector3(0, 0.1, 17), Vector3.ZERO, false)
+	foam.set_meta("dynamic", true)
 	foam.create_tween().set_loops().tween_property(foam, "position:z", 16.2, 2.5).set_trans(Tween.TRANS_SINE)
 	# low sunset sun over the sea
 	M3.sphere(root, 22, M3.mat(Color(1, 0.8, 0.45), 1.0, 3.0), Vector3(40, 18, 420), Vector3.ONE, 24, false)
@@ -443,6 +448,7 @@ static func _boracay(root: Node3D, info: Dictionary) -> void:
 	for k in range(6):
 		var p := Vector3(randf_range(-90, 90), 0.2, randf_range(45, 150))
 		var boat := Models.paraw(root, p, sails[k % 4], randf_range(0, 360))
+		boat.set_meta("dynamic", true)
 		var bt := boat.create_tween().set_loops()
 		bt.tween_property(boat, "position:y", 0.45, randf_range(1.6, 2.4)).set_trans(Tween.TRANS_SINE)
 		bt.tween_property(boat, "position:y", 0.05, randf_range(1.6, 2.4)).set_trans(Tween.TRANS_SINE)
