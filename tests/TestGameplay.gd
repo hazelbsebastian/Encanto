@@ -30,7 +30,7 @@ func _ready() -> void:
 	_run.call_deferred()
 
 func _run() -> void:
-	_out("Encanto AS3 gameplay tests (Week 15)")
+	_out("Encanto gameplay tests (Week 15 AS3, extended Week 17)")
 	_out("Engine: Godot %s | OS: %s | Build: %s | Date: %s" % [Engine.get_version_info()["string"], OS.get_name(),
 		ProjectSettings.get_setting("application/config/version"), Time.get_datetime_string_from_system()])
 	_out("")
@@ -68,6 +68,7 @@ func _run() -> void:
 		["N13", "Charge held while pausing is released cleanly after resume", n13_charge_through_pause],
 		["N14", "Bought outfit survives app restart; money cannot go negative", n14_wardrobe_persist],
 		["N15", "Real charged shots at the balete tree from 4 sides all count", n15_charged_shots_tree],
+		["N16", "Fire-rate limit: 40 taps in one frame fire 1 rock; next rock after 0.18 s", n16_fire_rate],
 	]
 	var only := _only_filter()
 	for t in tests:
@@ -343,6 +344,7 @@ func f03_rock_hits() -> void:
 				if (n as Label3D).text == "MINTIS" or (n as Label3D).text.begins_with("TAMA!"):
 					n.free()
 			var hp := int(e.get("health"))
+			await wait(0.2)   # Week 17 (D08): stay above the 0.18 s fire cooldown
 			sh.call("shoot_button_down")
 			trials += 1
 			var ok := await wait_until(func() -> bool: return int(e.get("health")) < hp, 1.0)
@@ -363,8 +365,10 @@ func f03_rock_hits() -> void:
 func f04_streak() -> void:
 	await start_level()
 	var sh: Node = _level.player.get_node("Shooting")
+	# Week 17 (D08): taps 0.2 s apart, slower than the 0.18 s fire cooldown
 	for i in range(4):
 		sh.call("shoot_button_down")
+		await wait(0.2)
 	check(not GameManager.charge_unlocked, "not ready after 4")
 	sh.call("shoot_button_down")
 	check(GameManager.charge_unlocked, "CHARGE READY after 5")
@@ -763,3 +767,27 @@ func n15_charged_shots_tree() -> void:
 		await physics(5)
 	note("charged shots fired: %d, counted by the tree: %d" % [sides.size(), counted])
 	check(counted == sides.size(), "every charged shot at the tree counts")
+
+## Week 17 (D08): rapid tapping must not fire one rock per tap.
+func n16_fire_rate() -> void:
+	await start_level()
+	var sh: Node = _level.player.get_node("Shooting")
+	var streak0 := GameManager.shot_streak
+	for i in range(40):
+		sh.call("shoot_button_down")
+		sh.call("shoot_button_up")
+	await frames(1)
+	check(_rocks() == 1, "one rock after 40 taps in one frame (got %d)" % _rocks())
+	check(GameManager.shot_streak == streak0 + 1, "streak +1 only")
+	await wait(0.25)
+	sh.call("shoot_button_down")
+	sh.call("shoot_button_up")
+	await frames(1)
+	check(_rocks() == 2, "a second rock is allowed after the 0.18 s cooldown (got %d)" % _rocks())
+
+func _rocks() -> int:
+	var n := 0
+	for c in get_tree().current_scene.get_children():
+		if c.get_script() == load("res://scripts/3d/Rock3D.gd"):
+			n += 1
+	return n

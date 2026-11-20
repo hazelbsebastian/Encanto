@@ -12,6 +12,10 @@ const CHARGE_MAX_TIME := 1.2
 const NORMAL_DAMAGE := 1
 const CHARGED_DAMAGE := 3
 const TARGET_RANGE := 24.0
+## Week 17 fix D08: at most one normal rock every 0.18 s (~5.5 per second).
+## Before, every tap fired - 40 taps in one frame gave 40 rocks (test N01)
+## and the 5-shot charge could be built almost instantly.
+const FIRE_COOLDOWN := 0.18
 
 @onready var player: CharacterBody3D = get_parent()
 
@@ -23,6 +27,7 @@ var _retarget_t: float = 0.0
 var _marker: Node3D
 var _charge_orb: MeshInstance3D
 var _charge_light: OmniLight3D
+var _cooldown: float = 0.0
 
 func _ready() -> void:
 	_marker = Node3D.new()
@@ -33,6 +38,7 @@ func _ready() -> void:
 	_marker.visible = false
 
 func _process(delta: float) -> void:
+	_cooldown = maxf(0.0, _cooldown - delta)
 	# keyboard / gamepad "shoot" action alongside the on-screen button
 	var key_down := Input.is_action_pressed("shoot")
 	if key_down and not _prev_key_down:
@@ -79,7 +85,8 @@ func shoot_button_down() -> void:
 		charge_time = 0.0
 		Audio.play_sfx("charge")
 		_spawn_charge_orb()
-	else:
+	elif _cooldown <= 0.0:
+		_cooldown = FIRE_COOLDOWN
 		_fire(false, 0.0)
 
 func shoot_button_up() -> void:
