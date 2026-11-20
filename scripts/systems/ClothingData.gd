@@ -18,7 +18,7 @@ const ITEMS := {
 
 	"none": {"name": "No Accessory", "category": "accessory", "price": 0, "icon": ""},
 	"salakot": {"name": "Salakot", "category": "accessory", "price": 300, "icon": "res://assets/ui/salakot_icon.png"},
-	"kerchief": {"name": "Traditional Kerchief", "category": "accessory", "price": 400, "icon": "res://assets/ui/salakot_icon.png"},
+	"kerchief": {"name": "Traditional Kerchief", "category": "accessory", "price": 400, "icon": "res://assets/ui/kerchief_icon.png"},
 }
 
 const CATEGORIES := ["top", "bottom", "accessory"]

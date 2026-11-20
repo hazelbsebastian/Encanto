@@ -827,6 +827,19 @@ def salakot_icon():
     return a
 
 
+def kerchief_icon():
+    # Week 17: the Traditional Kerchief had no icon of its own (used the Salakot's)
+    a = sprite(32, 24)
+    red, red_sh = (214, 52, 52), (160, 34, 38)
+    a.blob([(5, 15), (8, 6), (16, 2.5), (24, 6), (27, 15), (16, 18)], red, INK, 1.0, 1)
+    a.blob([(22, 13), (29, 19), (26, 22), (21, 17)], red_sh, INK, 0.8, 1)
+    a.blob([(22, 13), (30, 12), (30, 16), (23, 16)], red_sh, INK, 0.8, 1)
+    a.circle(22, 14.5, 2.0, red_sh, INK, 0.6)
+    for x, y in ((11, 8), (16, 6), (21, 9), (13, 13), (19, 13.5)):
+        a.circle(x, y, 1.1, (250, 236, 200))
+    return a
+
+
 def barong_icon():
     a = sprite(32, 32)
     a.blob([(9, 4), (13, 3), (16, 6), (19, 3), (23, 4), (30, 9), (27, 14), (25, 12), (25, 29), (7, 29), (7, 12), (5, 14), (2, 9)],
@@ -936,6 +949,7 @@ def _g_ui():
     bayong(False).save(path("ui", "bayong_closed.png"))
     bayong(True).save(path("ui", "bayong_open.png"))
     salakot_icon().save(path("ui", "salakot_icon.png"))
+    kerchief_icon().save(path("ui", "kerchief_icon.png"))
     barong_icon().save(path("ui", "barong_icon.png"))
     pants_icon().save(path("ui", "pants_icon.png"))
 
