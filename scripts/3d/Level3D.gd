@@ -92,6 +92,7 @@ func _ready() -> void:
 	Audio.play_ambient(str(info.get("ambient", "amb_countryside")))
 	Audio.play_music("music_explore")
 	_play_arrival_sequence()
+	_prewarm_shaders()
 
 func _spawn_player() -> void:
 	player = CharacterBody3D.new()
@@ -215,6 +216,36 @@ func _play_arrival_sequence() -> void:
 	player.set("controls_enabled", true)
 	hud.visible = true
 	_start_stage()
+
+## Week 17 fix B3 (Week 16 SA6): the first frame that drew the Kapre froze
+## for 99-155 ms (and 44-78 ms when the first puzzle-piece glow appeared).
+## Building the boss takes only ~8 ms; the freeze is the renderer compiling
+## shader variants the first time an omni light (Kapre's eyes, piece glow,
+## charged rock) and the creatures' materials are drawn. Draw all of that
+## once during the arrival cut-scene - a tiny copy of every creature right
+## in front of the camera plus a faint omni light - so the compile happens
+## while the jeepney pulls in instead of in the middle of the fight.
+func _prewarm_shaders() -> void:
+	var cams := rig.find_children("*", "Camera3D", true, false)
+	if cams.is_empty():
+		return
+	var warm := Node3D.new()
+	warm.name = "ShaderPrewarm"
+	(cams[0] as Node3D).add_child(warm)
+	warm.position = Vector3(0, 0, -1.5)
+	warm.scale = Vector3.ONE * 0.004
+	for build in [Models.tyanak, Models.manananggal_upper, Models.manananggal_lower, Models.tikbalang, Models.kapre, Models.balete]:
+		var holder := Node3D.new()
+		warm.add_child(holder)
+		build.call(holder)
+	var light := OmniLight3D.new()
+	light.light_energy = 0.02
+	light.omni_range = 60.0
+	world.add_child(light)
+	light.global_position = (cams[0] as Node3D).global_position
+	await get_tree().create_timer(0.5, false).timeout
+	warm.queue_free()
+	light.queue_free()
 
 func _spin_wheels(angle: float) -> void:
 	if not is_instance_valid(jeep):
