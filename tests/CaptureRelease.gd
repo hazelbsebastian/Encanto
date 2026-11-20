@@ -27,6 +27,9 @@ func _run() -> void:
 	await _shot("R2_settings_panel")
 	(t.get_node("SettingsPanel/VBox/InfoRow/HowToButton") as Button).pressed.emit()
 	await _shot("R3_how_to_play")
+	var hs := (t.get("_info") as Node).find_child("Scroll", true, false) as ScrollContainer
+	hs.scroll_vertical = 300
+	await _shot("R3b_how_to_play_filipino_games")
 	t.call("_close_info")
 	(t.get_node("SettingsPanel/VBox/InfoRow/CreditsButton") as Button).pressed.emit()
 	await _shot("R4_credits_top")
