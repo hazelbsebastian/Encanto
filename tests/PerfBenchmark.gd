@@ -24,6 +24,9 @@ const BOSS_SEC := 15.0
 const SHOT_EVERY := 0.30
 
 var label := "run"
+## --no-store: keep no per-frame samples (only the 10 s progress log), to
+## check how much of the memory growth is the benchmark's own sample buffer.
+var store := true
 var phase := ""
 var rows: PackedStringArray = []
 var phase_frames: Dictionary = {}   # phase -> Array of Dictionaries
@@ -38,6 +41,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--label="):
 			label = a.trim_prefix("--label=")
+		if a == "--no-store":
+			store = false
 		if a == "--no-bake":   # A/B switch for SA6 optimisation O1
 			MapBuilder3D.bake_static = false
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
@@ -56,7 +61,7 @@ func _process(_delta: float) -> void:
 	var frame_ms := (now - _last_us) / 1000.0
 	_last_us = now
 	_dismiss_focus_pause()
-	if phase == "":
+	if phase == "" or not store:
 		return
 	var r := {
 		"frame_ms": frame_ms,
@@ -146,7 +151,10 @@ func _play(duration: float, boss: bool) -> void:
 	var next_log := 0.0
 	while t < duration:
 		if t >= next_log:
-			print("[bench] %s t=%.0f s stage=%d paused=%s" % [phase, t, GameManager.current_stage_index, get_tree().paused])
+			print("[bench] %s t=%.0f s stage=%d paused=%s | objects %d resources %d orphan nodes %d static %.1f MB" % [phase, t,
+				GameManager.current_stage_index, get_tree().paused, Performance.get_monitor(Performance.OBJECT_COUNT),
+				Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT), Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT),
+				Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0])
 			next_log += 10.0
 		if Time.get_ticks_msec() - wall_start > int(duration * 1000) + 60000:
 			push_warning("benchmark guard: %s did not finish in time" % phase)
