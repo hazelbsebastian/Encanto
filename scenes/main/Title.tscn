@@ -181,9 +181,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -230.0
-offset_top = -200.0
+offset_top = -130.0
 offset_right = 230.0
-offset_bottom = 200.0
+offset_bottom = 130.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -209,23 +209,21 @@ max_value = 1.0
 step = 0.05
 value = 0.8
 
-[node name="ControlsCard" type="PanelContainer" parent="SettingsPanel/VBox"]
+[node name="InfoRow" type="HBoxContainer" parent="SettingsPanel/VBox"]
 layout_mode = 2
-theme_type_variation = &"CardPanel"
+theme_override_constants/separation = 12
 
-[node name="ControlsLabel" type="Label" parent="SettingsPanel/VBox/ControlsCard"]
+[node name="HowToButton" type="Button" parent="SettingsPanel/VBox/InfoRow"]
 layout_mode = 2
-theme_type_variation = &"HintLabel"
-theme_override_font_sizes/font_size = 15
-text = "KEYBOARD
-Galaw: W A S D  o  ← ↑ → ↓
-Talon: SPACE   (double jump sa Tikbalang)
-Tira: X  (auto-aim; hawakan para mag-charge)
-Camera: Q / E  o  i-drag ang screen
-Hinto: ESC / P
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 60)
+text = "PAANO MAGLARO"
 
-TOUCH: joystick sa kaliwa, TIRA at TALON sa kanan,
-i-drag ang screen para iikot ang camera"
+[node name="CreditsButton" type="Button" parent="SettingsPanel/VBox/InfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 60)
+text = "CREDITS"
 
 [node name="CloseButton" type="Button" parent="SettingsPanel/VBox"]
 layout_mode = 2

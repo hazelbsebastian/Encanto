@@ -52,6 +52,7 @@ func _run() -> void:
 		["F14", "Pause menu pauses the fight; resume continues", f14_pause],
 		["F15", "Volume slider changes the Master bus; 0 = mute", f15_volume],
 		["F16", "Quit to menu from pause saves and returns to Title", f16_quit_to_menu],
+		["F17", "Title: How to Play and Credits open from Settings and close (button and Esc)", f17_howto_credits],
 		# --- negative / boundary ---
 		["N01", "Rapid input: 40 shots in one frame - no crash, rocks cleaned up", n01_rapid_shots],
 		["N02", "Rapid input: pause pressed 10 times - one menu, state consistent", n02_rapid_pause],
@@ -791,3 +792,37 @@ func _rocks() -> int:
 		if c.get_script() == load("res://scripts/3d/Rock3D.gd"):
 			n += 1
 	return n
+
+## Week 17 (PT7): instructions and credits are reachable from the title.
+func f17_howto_credits() -> void:
+	var t := open_scene("res://scenes/main/Title.tscn")
+	await frames(3)
+	(t.get_node("VBox/MenuGrid/SettingsButton") as Button).pressed.emit()
+	await frames(2)
+	(t.get_node("SettingsPanel/VBox/InfoRow/HowToButton") as Button).pressed.emit()
+	await frames(2)
+	var info: Node = t.get("_info")
+	check(info != null, "How to Play panel opened")
+	if info:
+		var body := info.find_child("Body", true, false) as Label
+		check(body != null and body.text.contains("LAYUNIN") and body.text.contains("CHARGE"), "instructions text shown")
+		for b in info.find_children("*", "Button", true, false):
+			if (b as Button).text == "ISARA":
+				(b as Button).pressed.emit()
+		await frames(2)
+		check(t.get("_info") == null, "ISARA closes the panel")
+	(t.get_node("SettingsPanel/VBox/InfoRow/CreditsButton") as Button).pressed.emit()
+	await frames(2)
+	info = t.get("_info")
+	check(info != null, "Credits panel opened")
+	if info:
+		var body2 := info.find_child("Body", true, false) as Label
+		check(body2 != null and body2.text.contains("Hazel B. Sebastian") and body2.text.contains("Permission is hereby granted")
+			and body2.text.contains("AI ASSISTANCE"), "credits show the author, AI disclosure and the Godot MIT license")
+		var ev := InputEventAction.new()
+		ev.action = "ui_cancel"
+		ev.pressed = true
+		Input.parse_input_event(ev)
+		await frames(3)
+		check(t.get("_info") == null, "Esc closes the panel")
+	check(t.get_node("SettingsPanel").visible, "settings panel still open underneath")

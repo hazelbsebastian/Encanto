@@ -13,6 +13,68 @@ extends Control
 @onready var farmer: TextureRect = $Farmer
 
 static var _welcomed: bool = false
+## Week 17 (PT7): instructions and credits, opened from the settings panel.
+var _info: CanvasLayer = null
+
+const HOW_TO_PLAY := """LAYUNIN
+Sumakay sa jeepney papunta sa isa sa limang lugar sa Pilipinas. Talunin ang 4 na Tyanak, 4 na Manananggal at 4 na Tikbalang, saka patumbahin ang puno ng balete ng Kapre para manalo.
+
+PAANO
+1. PLAY - piliin ang lugar ("San punta mo?") at sumakay.
+2. Batuhin ang mga nilalang gamit ang TIRA. Kusa itong tumututok sa pinakamalapit (gintong bilog).
+3. Bawat natalong nilalang ay may iniiwang piraso ng larawan. Pagkatapos ng bawat yugto, ayusin ang 4 na piraso para makilala ang susunod na kalaban.
+4. 5 sunod-sunod na tira = CHARGE READY. Hawakan ang TIRA para mag-charge, bitawan para ibato. Ito lang ang nakakasira sa puno ng Kapre.
+5. May 5 PUSO ka. Kapag naubos: Game Over - pwedeng subukan ulit.
+6. Kapag nanalo: piliin ang PERA (P500) o ang BAYONG (random na damit). Gamitin sa WARDROBE.
+
+KONTROL - TOUCH
+Joystick sa kaliwa = galaw  |  TIRA at TALON sa kanan  |  i-drag ang screen = camera  |  II = hinto
+
+KONTROL - KEYBOARD
+Galaw: W A S D o arrow keys  |  Talon: SPACE (double jump mula sa Tikbalang)
+Tira: X (hawakan para mag-charge)  |  Camera: Q / E  |  Hinto: ESC o P
+Menu: arrow keys + ENTER, ESC = bumalik
+
+PAG-SAVE
+Naka-save ang pera at mga damit sa iyong profile sa device na ito lamang (walang internet). Kapag nawala sa focus ang app (tawag, home button), kusang humihinto ang laro."""
+
+const CREDITS := """ENCANTO  -  version %s
+Isang laro tungkol sa mga nilalang ng alamat ng Pilipinas.
+Theme: Philippine Games and Sports
+
+GAME DESIGN AT DEVELOPMENT
+Hazel B. Sebastian  -  BSIT-4A
+MOBILE DEV 002 - Advanced Mobile Application Development
+
+ENGINE
+Godot Engine %s - MIT License (full text below)
+
+ART AT 3D MODELS
+Lahat ng 2D art ay ginawa ng sariling Python/Pillow scripts ng proyekto (gen_scripts/). Ang mga 3D na tauhan, hayop at lugar ay binuo sa code mula sa simpleng hugis (M3.gd, Models.gd, MapBuilder3D.gd). Walang third-party na art.
+
+MUSIKA AT SOUND EFFECTS
+Kulintang-style na musika, ambience at SFX: sinynthesize ng sariling scripts (gen_audio.py, gen_audio_more.py).
+
+BOSES
+Windows text-to-speech (Microsoft David at Microsoft Zira, System.Speech) na may phonetic na Tagalog.
+
+FONTS
+Mga system font ng device - walang font file na kasama sa laro.
+
+ALAMAT AT LUGAR
+Tyanak, Manananggal, Tikbalang at Kapre - mga tradisyonal na alamat ng Pilipinas. Banaue Rice Terraces, Intramuros, Mayon Volcano, Chocolate Hills at Boracay.
+
+AI ASSISTANCE (disclosure)
+Claude (Anthropic) ang tumulong sa pagsulat at pag-review ng code, ng mga script na gumawa ng art at tunog, ng mga automated test at ng dokumentasyon. Nakasaad ito sa lahat ng project documents.
+
+SALAMAT
+Sa mga playtester ng Week 14 at sa aming instructor.
+
+--------------------------------
+GODOT ENGINE LICENSE
+%s
+
+Godot Engine also contains third-party libraries under their own licenses (listed at godotengine.org/license)."""
 
 func _ready() -> void:
 	# Week 13: every run belongs to a local profile. First launch (or after
@@ -32,6 +94,11 @@ func _ready() -> void:
 	settings_button.pressed.connect(_on_settings_open)
 	$VBox/MenuGrid/ExitButton.pressed.connect(_on_exit)
 	close_button.pressed.connect(_on_settings_close)
+	$SettingsPanel/VBox/InfoRow/HowToButton.pressed.connect(func() -> void: _open_info("PAANO MAGLARO", HOW_TO_PLAY))
+	$SettingsPanel/VBox/InfoRow/CreditsButton.pressed.connect(func() -> void:
+		var v: Dictionary = Engine.get_version_info()
+		_open_info("CREDITS", CREDITS % [ProjectSettings.get_setting("application/config/version"),
+			"%d.%d.%d" % [v.major, v.minor, v.patch], Engine.get_license_text()]))
 	volume_slider.value = SaveSystem.volume
 	volume_slider.value_changed.connect(_on_volume_changed)
 	# keyboard hint only makes sense for keyboard players (Week 14)
@@ -57,6 +124,10 @@ func _ready() -> void:
 		get_tree().create_timer(0.6).timeout.connect(func() -> void: Audio.play_voice("narrator_welcome"))
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _info != null and event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_close_info()
+		return
 	if settings_panel.visible and event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		_on_settings_close()
@@ -123,3 +194,44 @@ func _on_volume_changed(value: float) -> void:
 
 func _on_exit() -> void:
 	get_tree().quit()
+
+## Scrollable text panel on top of the settings panel (instructions, credits).
+func _open_info(title: String, text: String) -> void:
+	if _info != null:
+		return
+	Audio.play_sfx("click")
+	_info = CanvasLayer.new()
+	_info.layer = 10
+	add_child(_info)
+	UIKit.dim(_info, 0.6)
+	var panel := UIKit.centered_panel(_info, Vector2(780, 470))
+	var box := UIKit.vbox(panel, 10)
+	UIKit.label(box, title, "HeaderLabel")
+	var scroll := ScrollContainer.new()
+	scroll.name = "Scroll"
+	scroll.custom_minimum_size = Vector2(740, 330)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.focus_mode = Control.FOCUS_ALL   # arrow keys / drag scroll the text
+	box.add_child(scroll)
+	var body := UIKit.label(scroll, text, "HintLabel", 15)
+	body.name = "Body"
+	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	body.custom_minimum_size = Vector2(720, 0)
+	var close := UIKit.button(box, "ISARA", true, UIKit.MIN_TOUCH)
+	close.pressed.connect(_close_info)
+	_set_settings_focusable(false)
+	UIKit.pop_in(panel)
+	Controls.focus(close)
+
+func _close_info() -> void:
+	if _info == null:
+		return
+	Audio.play_sfx("click")
+	_info.queue_free()
+	_info = null
+	_set_settings_focusable(true)
+	Controls.focus(close_button)
+
+func _set_settings_focusable(on: bool) -> void:
+	for b in [volume_slider, close_button, $SettingsPanel/VBox/InfoRow/HowToButton, $SettingsPanel/VBox/InfoRow/CreditsButton]:
+		(b as Control).focus_mode = Control.FOCUS_ALL if on else Control.FOCUS_NONE
